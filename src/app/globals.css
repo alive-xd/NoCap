@@ -1,0 +1,487 @@
+@import "tailwindcss";
+
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   NoCap Design System — Design Tokens
+   All values are frozen per ADR. Do not approximate.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Color tokens — exact values, not approximations */
+  --bg-base:          #14181F; /* ink-graphite base, not pure black */
+  --bg-surface:       #1C222C; /* slate — cards and panels */
+  --bg-surface-2:     #232B37; /* slightly lighter — nested panels */
+  --bg-border:        #2A3342; /* visible border for document-style depth */
+
+  --accent-open:      #C9A227; /* aged brass — unverified/in-progress */
+  --accent-confirmed: #4F8F87; /* muted teal — confirmed/high-confidence */
+  --accent-severe:    #B5483D; /* oxide red — high severity, reads as a stamp */
+  --accent-info:      #5A7FA8; /* steel blue — info/neutral */
+
+  --text-primary:     #E8E4DA; /* warm paper-white, never pure white */
+  --text-secondary:   #9FA8B4; /* muted — secondary labels */
+  --text-tertiary:    #6B7585; /* dim — timestamps, metadata */
+  --text-inverse:     #14181F; /* dark text on light backgrounds */
+
+  /* Severity colors */
+  --severity-critical: #B5483D;
+  --severity-high:     #C9752A;
+  --severity-medium:   #C9A227;
+  --severity-low:      #4F8F87;
+  --severity-info:     #5A7FA8;
+
+  /* Finding status colors */
+  --status-flagged:      #C9A227;
+  --status-confirmed:    #4F8F87;
+  --status-cleared:      #6B7585;
+  --status-under-review: #5A7FA8;
+
+  /* Typography */
+  --font-display:  "Spectral", Georgia, serif;
+  --font-body:     "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono:     "IBM Plex Mono", "Courier New", monospace;
+
+  /* Spacing */
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   6px;
+
+  /* Borders — visible, not shadow-based depth */
+  --border:       1px solid var(--bg-border);
+  --border-accent: 1px solid var(--accent-open);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   Base
+   ──────────────────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* All raw data values — hashes, IPs, scores, timestamps, evidence strings.
+   This is a hard rule: every raw data value is visually distinct. */
+.mono, code, .evidence-value, .hash, .ip-address, .score-number {
+  font-family: var(--font-mono) !important;
+}
+
+/* Headings use the institutional serif */
+h1, h2, h3, .display, .case-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   THE STAMP ANIMATION — the one signature motion in this product.
+   Fires once per Finding on resolution. Not on hover, not on load.
+   This is the only place we spend our boldness.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@keyframes stamp {
+  0%   { transform: rotate(-8deg) scale(1.3); opacity: 0; }
+  40%  { transform: rotate(2deg) scale(0.96); opacity: 1; }
+  65%  { transform: rotate(-1deg) scale(1.02); }
+  82%  { transform: rotate(0.5deg) scale(0.99); }
+  100% { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+.stamp-animate {
+  animation: stamp 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-origin: center;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   REDACTION BAR LOADING STATE
+   Sections awaiting data render with redaction-bar texture instead of a spinner.
+   Visually communicates "evidence hasn't arrived yet" — consistent with case-file metaphor.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@keyframes redact-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 0.4; }
+}
+
+.redacted-line {
+  background: var(--bg-border);
+  border-radius: var(--radius-sm);
+  animation: redact-pulse 1.8s ease-in-out infinite;
+}
+
+.redacted-block {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 12px,
+    var(--bg-border) 12px,
+    var(--bg-border) 20px
+  );
+  animation: redact-pulse 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   PANELS — sharp or minimally rounded corners, visible border, no drop-shadow
+   Consistent with physical document, not floating UI card.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.panel {
+  background: var(--bg-surface);
+  border: var(--border);
+  border-radius: var(--radius-md);
+}
+
+.panel-nested {
+  background: var(--bg-surface-2);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   EVIDENCE TAG — bordered, slightly rotates on hover. Reads like a physical tag.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.evidence-tag {
+  background: var(--bg-surface);
+  border: var(--border);
+  border-left: 3px solid var(--accent-open);
+  border-radius: var(--radius-sm);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.evidence-tag:hover {
+  transform: rotate(-0.4deg);
+  border-left-color: var(--accent-confirmed);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   SEVERITY BADGES
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.severity-badge {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+}
+
+.severity-CRITICAL {
+  color: var(--severity-critical);
+  border-color: var(--severity-critical);
+  background: color-mix(in srgb, var(--severity-critical) 10%, transparent);
+}
+.severity-HIGH {
+  color: var(--severity-high);
+  border-color: var(--severity-high);
+  background: color-mix(in srgb, var(--severity-high) 10%, transparent);
+}
+.severity-MEDIUM {
+  color: var(--severity-medium);
+  border-color: var(--severity-medium);
+  background: color-mix(in srgb, var(--severity-medium) 10%, transparent);
+}
+.severity-LOW {
+  color: var(--severity-low);
+  border-color: var(--severity-low);
+  background: color-mix(in srgb, var(--severity-low) 10%, transparent);
+}
+.severity-INFO {
+  color: var(--severity-info);
+  border-color: var(--severity-info);
+  background: color-mix(in srgb, var(--severity-info) 10%, transparent);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   FINDING STATUS — case-file language
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.finding-status {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-FLAGGED {
+  color: var(--status-flagged);
+  border-color: var(--status-flagged);
+  background: color-mix(in srgb, var(--status-flagged) 8%, transparent);
+}
+.status-CONFIRMED {
+  color: var(--status-confirmed);
+  border-color: var(--status-confirmed);
+  background: color-mix(in srgb, var(--status-confirmed) 8%, transparent);
+}
+.status-CLEARED {
+  color: var(--status-cleared);
+  border-color: var(--status-cleared);
+  background: color-mix(in srgb, var(--status-cleared) 8%, transparent);
+}
+.status-UNDER_REVIEW {
+  color: var(--status-under-review);
+  border-color: var(--status-under-review);
+  background: color-mix(in srgb, var(--status-under-review) 8%, transparent);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   SCORE DISPLAY
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.score-display {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.score-low    { color: var(--severity-low); }
+.score-medium { color: var(--severity-medium); }
+.score-high   { color: var(--severity-high); }
+.score-critical { color: var(--severity-critical); }
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   TIMELINE
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.timeline-spine {
+  position: relative;
+}
+
+.timeline-spine::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--bg-border);
+}
+
+.timeline-step {
+  position: relative;
+  padding-left: 48px;
+}
+
+.timeline-step::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 6px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 2px solid var(--bg-border);
+}
+
+.timeline-step.completed::before {
+  background: var(--accent-confirmed);
+  border-color: var(--accent-confirmed);
+}
+
+.timeline-step.failed::before {
+  background: var(--accent-severe);
+  border-color: var(--accent-severe);
+}
+
+.timeline-step.pending::before {
+  background: var(--bg-surface-2);
+  border-color: var(--accent-open);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   BUTTONS — quiet, disciplined, no gradients
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent-open);
+  border-color: var(--accent-open);
+  color: var(--text-inverse);
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--accent-open) 85%, white);
+  border-color: color-mix(in srgb, var(--accent-open) 85%, white);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--bg-border);
+  color: var(--text-primary);
+}
+.btn-secondary:hover {
+  background: var(--bg-surface-2);
+  border-color: var(--text-tertiary);
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--accent-severe);
+  color: var(--accent-severe);
+}
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--accent-severe) 12%, transparent);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   FORM INPUTS — document-style
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.input {
+  background: var(--bg-base);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  padding: 10px 14px;
+  width: 100%;
+  transition: border-color 0.12s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--accent-open);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input-mono {
+  font-family: var(--font-mono);
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   CASE NUMBER
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.case-number {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.case-number-prominent {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--accent-open);
+  letter-spacing: 0.05em;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   SOURCE STATUS INDICATORS
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.source-ok {
+  color: var(--accent-confirmed);
+}
+
+.source-warn {
+  color: var(--accent-open);
+}
+
+.source-fail {
+  color: var(--accent-severe);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   STICKY SCORE PANEL
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.sticky-panel {
+  position: sticky;
+  top: 1.5rem;
+  background: var(--bg-surface);
+  border: var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   UTILITIES
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary  { color: var(--text-tertiary); }
+.text-open      { color: var(--accent-open); }
+.text-confirmed { color: var(--accent-confirmed); }
+.text-severe    { color: var(--accent-severe); }
+
+.text-accent-confirmed { color: var(--accent-confirmed); }
+.text-accent-open      { color: var(--accent-open); }
+.text-accent-severe    { color: var(--accent-severe); }
+
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+.font-mono    { font-family: var(--font-mono); }
+
+.bg-base    { background: var(--bg-base); }
+.bg-surface { background: var(--bg-surface); }
+
+.border-subtle { border: var(--border); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--bg-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* Selection */
+::selection {
+  background: color-mix(in srgb, var(--accent-open) 25%, transparent);
+  color: var(--text-primary);
+}
