@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DashboardNav from "@/components/DashboardNav";
 
@@ -12,7 +11,22 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    return (
+      <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-base)" }}>
+        <main
+          style={{
+            flex: 1,
+            minHeight: "100vh",
+            padding: "0",
+            overflow: "auto",
+          }}
+        >
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-base)" }}>

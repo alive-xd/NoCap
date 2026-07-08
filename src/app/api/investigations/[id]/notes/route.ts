@@ -79,6 +79,17 @@ export async function PATCH(
     .single();
   if (!inv) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Explicit ownership check for the note itself
+  const { data: noteCheck } = await supabase
+    .from("notes")
+    .select("investigation_id, investigations!inner(user_id)")
+    .eq("id", noteId)
+    .single();
+    
+  if (!noteCheck || (noteCheck.investigations as any)?.user_id !== user.id) {
+    return NextResponse.json({ error: "Unauthorized to modify this note" }, { status: 403 });
+  }
+
   const { data: note, error } = await supabase
     .from("notes")
     .update({ content: content.trim(), updated_at: new Date().toISOString() })

@@ -37,6 +37,8 @@ export interface Investigation {
   final_score: number | null;
   scoring_profile_version: string | null;
   failed_sources: FailedSource[];
+  is_public_demo: boolean;
+  summary?: string | null;
   created_at: string;
   completed_at: string | null;
 }
@@ -79,6 +81,7 @@ export interface Finding {
   created_at: string;
   // Joined relations (not stored as columns)
   evidence?: Evidence[];
+  attack_techniques?: string[]; // MITRE ATT&CK technique IDs
 }
 
 export interface ScoringProfile {
@@ -167,6 +170,7 @@ export interface ProducedFinding {
   score_contribution: number;
   reasoning: string;
   evidence_ids: string[]; // IDs of Evidence rows that back this finding
+  attack_techniques?: string[]; // MITRE ATT&CK technique IDs
 }
 
 /**
@@ -192,6 +196,7 @@ export interface InvestigationDetail extends Investigation {
     created_at: string;
     status: InvestigationStatus;
   }>;
+  all_evidence?: Evidence[];
 }
 
 export interface FindingWithEvidence extends Finding {

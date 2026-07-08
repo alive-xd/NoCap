@@ -8,11 +8,30 @@
  * Fields requested: status, message, country, countryCode, isp, org, as, query
  */
 
+import { promises as dns } from "dns";
+import { isIPv4, isIPv6 } from "net";
+
 const IPAPI_BASE = "http://ip-api.com/json";
 
 export async function fetchIPASN(
-  ip: string
+  target: string
 ): Promise<Record<string, unknown>> {
+  let ip = target;
+
+  // Resolve domain to IP if it's not already an IP address
+  if (!isIPv4(target) && !isIPv6(target)) {
+    try {
+      const addresses = await dns.resolve4(target);
+      if (addresses.length > 0) {
+        ip = addresses[0];
+      } else {
+        throw new Error("No IP addresses found for domain");
+      }
+    } catch (err) {
+      throw new Error(`DNS resolution failed for ${target}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   const fields = "status,message,country,countryCode,isp,org,as,query";
   const url = `${IPAPI_BASE}/${encodeURIComponent(ip)}?fields=${fields}`;
 

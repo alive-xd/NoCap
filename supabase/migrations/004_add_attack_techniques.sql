@@ -1,0 +1,1 @@
+ALTER TABLE findings ADD COLUMN IF NOT EXISTS attack_techniques TEXT[] NOT NULL DEFAULT '{}';

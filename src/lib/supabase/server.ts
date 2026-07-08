@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createLocalClient, isLocalMode } from "./local";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,6 +9,8 @@ export async function createClient(): Promise<any> {
   }
 
   const cookieStore = await cookies();
+  const headerStore = await headers();
+  const authHeader = headerStore.get("Authorization");
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +29,9 @@ export async function createClient(): Promise<any> {
             // Server Component — ignore
           }
         },
+      },
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : undefined,
       },
     }
   );

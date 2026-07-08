@@ -1,6 +1,8 @@
 // Analyzer Library — static metadata for every Analyzer in the system
 // This is the in-app documentation page.
 
+import { MITRE_MAPPINGS } from "@/lib/attack/mitreMapping";
+
 const ANALYZER_LIBRARY = [
   {
     name: "VirusTotalAnalyzer",
@@ -64,6 +66,7 @@ const ANALYZER_LIBRARY = [
     },
     requiredEvidence: ["registration_date"],
     producesFindings: ["Recently Registered Domain"],
+    attackTechniques: ['T1583.001'],
     exampleFinding: {
       claim: "Recently Registered Domain",
       severity: "HIGH",
@@ -85,6 +88,7 @@ const ANALYZER_LIBRARY = [
     },
     requiredEvidence: ["entropy_score", "domain_string", "sld", "digit_ratio", "consonant_ratio", "sld_length"],
     producesFindings: ["High Entropy Domain"],
+    attackTechniques: ['T1568.002'],
     exampleFinding: {
       claim: "High Entropy Domain",
       severity: "HIGH",
@@ -104,6 +108,7 @@ const ANALYZER_LIBRARY = [
     },
     requiredEvidence: ["asn_number", "asn", "org", "isp"],
     producesFindings: ["Known Abusive ASN"],
+    attackTechniques: ['T1583.003', 'T1583.004'],
     exampleFinding: {
       claim: "Known Abusive ASN",
       severity: "HIGH",
@@ -123,6 +128,7 @@ const ANALYZER_LIBRARY = [
     },
     requiredEvidence: ["closest_distance", "closest_brand", "input_domain", "input_sld", "all_candidates"],
     producesFindings: ["Potential Brand Impersonation"],
+    attackTechniques: ['T1566'],
     exampleFinding: {
       claim: "Potential Brand Impersonation",
       severity: "HIGH",
@@ -143,6 +149,7 @@ const ANALYZER_LIBRARY = [
     },
     requiredEvidence: ["spf_result", "dkim_result", "dmarc_result", "mismatch_flags", "hop_count", "received_hops"],
     producesFindings: ["Email Authentication Failure", "Suspicious Email Routing"],
+    attackTechniques: ['T1566'],
     exampleFinding: {
       claim: "Email Authentication Failure",
       severity: "CRITICAL",
@@ -162,6 +169,7 @@ const ANALYZER_LIBRARY = [
     },
     requiredEvidence: ["server_header", "x_powered_by", "x_generator", "detected_tech", "missing_security_headers", "present_security_headers", "exposed_paths"],
     producesFindings: ["Exposed Technology Stack", "Missing Security Headers"],
+    attackTechniques: ['T1592'],
     exampleFinding: {
       claim: "Missing Security Headers",
       severity: "MEDIUM",
@@ -415,6 +423,21 @@ export default function AnalyzerLibraryPage() {
                   ))}
                 </div>
 
+                {analyzer.attackTechniques && analyzer.attackTechniques.length > 0 && (
+                  <>
+                    <div className="analyzer-section-label" style={{ marginTop: "1rem" }}>ATT&CK Techniques</div>
+                    <div className="evidence-pills" style={{ marginBottom: "1rem" }}>
+                      {analyzer.attackTechniques.map((tId: string) => {
+                        const t = MITRE_MAPPINGS[tId];
+                        return (
+                          <span key={tId} className="evidence-pill" title={t?.tactic}>
+                            {tId}: {t?.techniqueName}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
                 <div className="analyzer-section-label" style={{ marginTop: "1rem" }}>Produces Findings</div>
                 <div className="findings-produces">
                   {analyzer.producesFindings.map((f) => (

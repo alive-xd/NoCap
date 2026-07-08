@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { isLocalMode } from "@/lib/supabase/local";
 
 export async function proxy(request: NextRequest) {
   // CSRF validation for mutating endpoints using cookie-based auth
@@ -34,46 +35,74 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Safety guard: if Supabase is not yet configured, pass all requests through.
-  // Remove this guard once you have added your .env.local credentials.
+  // Safety guard: if Supabase is not yet configured, fail closed.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!supabaseUrl || supabaseUrl === "https://your-project-id.supabase.co") {
-    return NextResponse.next({ request });
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const isVercelDeployed = process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
+  
+  if (
+    isVercelDeployed && 
+    (
+      !supabaseUrl || supabaseUrl === "https://your-project-id.supabase.co" ||
+      !supabaseAnonKey || supabaseAnonKey === "your-anon-key"
+    )
+  ) {
+    return new NextResponse(
+      JSON.stringify({ error: "Server configuration error: Supabase is not configured." }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   let supabaseResponse = NextResponse.next({ request });
+  let user: any = null;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  if (isLocalMode) {
+    user = { id: "local-dev-user-id", email: "dev@nocap.local" };
+  } else {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            supabaseResponse = NextResponse.next({ request });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            );
+          },
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
+      }
+    );
+
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user: supabaseUser } } = await supabase.auth.getUser(token);
+      user = supabaseUser;
+    } else {
+      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      user = supabaseUser;
     }
-  );
-
-  // Refresh session — must be called before checking user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  }
 
   const { pathname } = request.nextUrl;
   const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/auth");
+  const isPublicRoute = pathname === "/" || pathname.startsWith("/demo/") || pathname.startsWith("/api/demo/") || pathname.startsWith("/api/cron/");
 
   // Redirect unauthenticated users to login
-  if (!user && !isAuthRoute) {
+  if (!user && !isAuthRoute && !isPublicRoute) {
+    if (pathname.startsWith("/api/")) {
+      return new NextResponse(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);

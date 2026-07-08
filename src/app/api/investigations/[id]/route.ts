@@ -8,14 +8,11 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   // Fetch the investigation
   const { data: investigation, error: invError } = await supabase
     .from("investigations")
     .select("*")
     .eq("id", id)
-    .eq("user_id", user.id)
     .single();
 
   if (invError || !investigation) {
@@ -73,14 +70,20 @@ export async function GET(
   const tags = (tagRows ?? []).map((r: { tags: unknown }) => r.tags);
 
   // IOC History — prior investigations for the same target
-  const { data: priorInvestigations } = await supabase
+  const { data: priorInvestigations } = user ? await supabase
     .from("investigations")
     .select("id, case_number, final_score, created_at, status")
     .eq("target", investigation.target)
     .eq("user_id", user.id)
     .neq("id", id)
     .order("created_at", { ascending: false })
-    .limit(5);
+    .limit(5) : { data: [] };
+
+  // Evidence (all evidence for this investigation, regardless of findings)
+  const artifactIds = (artifacts ?? []).map((a: { id: string }) => a.id);
+  const { data: allEvidence } = artifactIds.length > 0
+    ? await supabase.from("evidence").select("*").in("artifact_id", artifactIds)
+    : { data: [] };
 
   return NextResponse.json({
     ...investigation,
@@ -90,5 +93,6 @@ export async function GET(
     notes: notes ?? [],
     tags,
     prior_investigations: priorInvestigations ?? [],
+    all_evidence: allEvidence ?? [],
   });
 }

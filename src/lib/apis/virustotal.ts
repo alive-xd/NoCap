@@ -41,8 +41,9 @@ export async function fetchVirusTotal(
   value: string
 ): Promise<Record<string, unknown>> {
   const apiKey = process.env.VIRUSTOTAL_API_KEY;
-  if (!apiKey) {
-    throw new Error("VIRUSTOTAL_API_KEY is not configured");
+  
+  if (!apiKey || apiKey.includes("placeholder") || apiKey.includes("your-")) {
+    throw new Error("VIRUSTOTAL_API_KEY is not configured or is a placeholder");
   }
 
   const url = `${VT_BASE}${vtPath(type, value)}`;
@@ -57,6 +58,9 @@ export async function fetchVirusTotal(
   });
 
   if (!response.ok) {
+    if (response.status === 404 && type === "url") {
+      return await submitAndPollVTUrl(value, apiKey);
+    }
     const errorText = await response.text().catch(() => response.statusText);
     throw new Error(
       `VirusTotal API error ${response.status}: ${errorText}`
@@ -64,4 +68,61 @@ export async function fetchVirusTotal(
   }
 
   return response.json() as Promise<Record<string, unknown>>;
+}
+
+async function submitAndPollVTUrl(
+  value: string,
+  apiKey: string
+): Promise<Record<string, unknown>> {
+  const submitBody = new URLSearchParams({ url: value });
+  const submitRes = await fetch(`${VT_BASE}/urls`, {
+    method: "POST",
+    headers: {
+      "x-apikey": apiKey,
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: submitBody,
+    cache: "no-store",
+  });
+
+  if (!submitRes.ok) {
+    const errorText = await submitRes.text().catch(() => submitRes.statusText);
+    throw new Error(`VirusTotal URL submission failed (${submitRes.status}): ${errorText}`);
+  }
+
+  const submitData = (await submitRes.json()) as { data?: { id?: string } };
+  const analysisId = submitData.data?.id;
+  if (!analysisId) {
+    throw new Error("VirusTotal submission returned no analysis ID");
+  }
+
+  const maxAttempts = 12; // ~45s total with backoff
+  let delay = 2000;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    
+    const analysisRes = await fetch(`${VT_BASE}/analyses/${analysisId}`, {
+      headers: { "x-apikey": apiKey, Accept: "application/json" },
+      cache: "no-store",
+    });
+
+    if (!analysisRes.ok) {
+       const errorText = await analysisRes.text().catch(() => analysisRes.statusText);
+       throw new Error(`VirusTotal analysis poll failed (${analysisRes.status}): ${errorText}`);
+    }
+
+    const analysisData = (await analysisRes.json()) as { data?: { attributes?: { status?: string } } };
+    const status = analysisData.data?.attributes?.status;
+
+    if (status === "completed") {
+      // Return the full URL report now that scanning is finished
+      return await fetchVirusTotal("url", value);
+    }
+
+    delay = Math.min(delay * 1.5, 5000);
+  }
+
+  throw new Error("VirusTotal URL analysis timed out after waiting");
 }

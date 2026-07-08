@@ -69,6 +69,7 @@ export class HomographAnalyzer implements Analyzer {
         confidence_score: isHighConfidence ? 80 : 55,
         score_contribution: isHighConfidence ? 20 : 10,
         reasoning: `Domain "${inputDomain}" (SLD: "${inputSLD}") has a Levenshtein distance of ${closestDistance} from brand "${closestBrand}". This falls within the threshold for visual impersonation (distance <= ${thresholds.distanceFlag}). Homograph normalization (rn→m, 0→o, etc.) was applied before comparison to detect character-substitution attacks.`,
+        attack_techniques: ['T1566'],
         evidence_ids: getEvidenceIds(
           input.evidence,
           "closest_brand",

@@ -96,6 +96,7 @@ export class EmailAuthAnalyzer implements Analyzer {
         confidence_score: confidence,
         score_contribution: thresholds.authFailScoreContrib,
         reasoning: `${authFailures.join("; ")}. Failure of email authentication protocols (SPF/DKIM/DMARC) indicates the sender is not authorized to send on behalf of the claimed domain, or the message was modified in transit. Combined failures are a strong phishing indicator.`,
+        attack_techniques: ['T1566'],
         evidence_ids: getEvidenceIds(input.evidence, ...failedResults, "mismatch_flags"),
       });
     }
@@ -125,6 +126,7 @@ export class EmailAuthAnalyzer implements Analyzer {
         confidence_score: 60,
         score_contribution: thresholds.mismatchScoreContrib,
         reasoning: `${routingIssues.join("; ")}. Reply-To/From mismatches are a primary Business Email Compromise (BEC) indicator. Excessive relay hops can indicate deliberate obfuscation of the true sending origin.`,
+        attack_techniques: ['T1566'],
         evidence_ids: getEvidenceIds(
           input.evidence,
           ...new Set(routingEvidenceTypes)

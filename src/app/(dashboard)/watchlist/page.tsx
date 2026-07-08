@@ -24,7 +24,8 @@ export default function WatchlistPage() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchItems(); }, []);
+  useEffect(() => { // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchItems(); }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();

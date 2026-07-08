@@ -8,47 +8,44 @@
 
 :root {
   /* Color tokens — exact values, not approximations */
-  --bg-base:          #14181F; /* ink-graphite base, not pure black */
-  --bg-surface:       #1C222C; /* slate — cards and panels */
-  --bg-surface-2:     #232B37; /* slightly lighter — nested panels */
-  --bg-border:        #2A3342; /* visible border for document-style depth */
+  --bg-base:          #1B1F24; /* deep slate */
+  --bg-surface:       #21262D; /* cards and panels */
+  --bg-surface-2:     #2D333B; /* nested panels */
+  --bg-border:        #30363D; /* visible border for document-style depth */
 
-  --accent-open:      #C9A227; /* aged brass — unverified/in-progress */
-  --accent-confirmed: #4F8F87; /* muted teal — confirmed/high-confidence */
-  --accent-severe:    #B5483D; /* oxide red — high severity, reads as a stamp */
-  --accent-info:      #5A7FA8; /* steel blue — info/neutral */
+  --accent-primary:   #4FA8A0; /* muted cyan-teal — interactive/links */
 
-  --text-primary:     #E8E4DA; /* warm paper-white, never pure white */
-  --text-secondary:   #9FA8B4; /* muted — secondary labels */
-  --text-tertiary:    #6B7585; /* dim — timestamps, metadata */
-  --text-inverse:     #14181F; /* dark text on light backgrounds */
+  --text-primary:     #E4E6EB; /* off-white */
+  --text-secondary:   #8B949E; /* muted — secondary labels */
+  --text-tertiary:    #6E7681; /* dim — timestamps, metadata */
+  --text-inverse:     #1B1F24; /* dark text on light backgrounds */
 
-  /* Severity colors */
-  --severity-critical: #B5483D;
-  --severity-high:     #C9752A;
-  --severity-medium:   #C9A227;
-  --severity-low:      #4F8F87;
-  --severity-info:     #5A7FA8;
+  /* Severity colors (ONLY for scores/severity indicators) */
+  --severity-critical: #A34A3C;
+  --severity-high:     #B45F3C;
+  --severity-medium:   #C98A3E;
+  --severity-low:      #4FA8A0; /* fallback teal for low severity */
+  --severity-info:     #6E7681;
 
-  /* Finding status colors */
-  --status-flagged:      #C9A227;
-  --status-confirmed:    #4F8F87;
-  --status-cleared:      #6B7585;
-  --status-under-review: #5A7FA8;
+  /* Finding status colors (No decoration, using neutral/accent) */
+  --status-flagged:      #8B949E;
+  --status-confirmed:    #4FA8A0;
+  --status-cleared:      #6E7681;
+  --status-under-review: #8B949E;
 
   /* Typography */
-  --font-display:  "Spectral", Georgia, serif;
+  --font-display:  "IBM Plex Sans", system-ui, sans-serif;
   --font-body:     "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono:     "IBM Plex Mono", "Courier New", monospace;
+  --font-mono:     "JetBrains Mono", "Courier New", monospace;
 
   /* Spacing */
-  --radius-sm:   2px;
-  --radius-md:   4px;
-  --radius-lg:   6px;
+  --radius-sm:   0px;
+  --radius-md:   0px;
+  --radius-lg:   0px;
 
-  /* Borders — visible, not shadow-based depth */
+  /* Borders — visible, sharp */
   --border:       1px solid var(--bg-border);
-  --border-accent: 1px solid var(--accent-open);
+  --border-accent: 1px solid var(--accent-primary);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
@@ -160,7 +157,7 @@ h1, h2, h3, .display, .case-title {
 .evidence-tag {
   background: var(--bg-surface);
   border: var(--border);
-  border-left: 3px solid var(--accent-open);
+  border-left: 3px solid var(--text-tertiary);
   border-radius: var(--radius-sm);
   transition: transform 0.15s ease, border-color 0.15s ease;
   cursor: pointer;
@@ -168,7 +165,7 @@ h1, h2, h3, .display, .case-title {
 
 .evidence-tag:hover {
   transform: rotate(-0.4deg);
-  border-left-color: var(--accent-confirmed);
+  border-left-color: var(--accent-primary);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
@@ -306,18 +303,18 @@ h1, h2, h3, .display, .case-title {
 }
 
 .timeline-step.completed::before {
-  background: var(--accent-confirmed);
-  border-color: var(--accent-confirmed);
+  background: var(--status-confirmed);
+  border-color: var(--status-confirmed);
 }
 
 .timeline-step.failed::before {
-  background: var(--accent-severe);
-  border-color: var(--accent-severe);
+  background: var(--severity-critical);
+  border-color: var(--severity-critical);
 }
 
 .timeline-step.pending::before {
   background: var(--bg-surface-2);
-  border-color: var(--accent-open);
+  border-color: var(--accent-primary);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
@@ -341,13 +338,13 @@ h1, h2, h3, .display, .case-title {
 }
 
 .btn-primary {
-  background: var(--accent-open);
-  border-color: var(--accent-open);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
   color: var(--text-inverse);
 }
 .btn-primary:hover {
-  background: color-mix(in srgb, var(--accent-open) 85%, white);
-  border-color: color-mix(in srgb, var(--accent-open) 85%, white);
+  background: color-mix(in srgb, var(--accent-primary) 85%, white);
+  border-color: color-mix(in srgb, var(--accent-primary) 85%, white);
 }
 
 .btn-secondary {
@@ -362,11 +359,11 @@ h1, h2, h3, .display, .case-title {
 
 .btn-danger {
   background: transparent;
-  border-color: var(--accent-severe);
-  color: var(--accent-severe);
+  border-color: var(--severity-critical);
+  color: var(--severity-critical);
 }
 .btn-danger:hover {
-  background: color-mix(in srgb, var(--accent-severe) 12%, transparent);
+  background: color-mix(in srgb, var(--severity-critical) 12%, transparent);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
@@ -387,7 +384,7 @@ h1, h2, h3, .display, .case-title {
 }
 
 .input:focus {
-  border-color: var(--accent-open);
+  border-color: var(--accent-primary);
 }
 
 .input::placeholder {
@@ -418,7 +415,7 @@ textarea.input {
 .case-number-prominent {
   font-family: var(--font-mono);
   font-size: 0.875rem;
-  color: var(--accent-open);
+  color: var(--accent-primary);
   letter-spacing: 0.05em;
 }
 
@@ -427,15 +424,15 @@ textarea.input {
    ──────────────────────────────────────────────────────────────────────────── */
 
 .source-ok {
-  color: var(--accent-confirmed);
+  color: var(--status-confirmed);
 }
 
 .source-warn {
-  color: var(--accent-open);
+  color: var(--accent-primary);
 }
 
 .source-fail {
-  color: var(--accent-severe);
+  color: var(--severity-critical);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
@@ -457,13 +454,13 @@ textarea.input {
 .text-primary   { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-tertiary  { color: var(--text-tertiary); }
-.text-open      { color: var(--accent-open); }
-.text-confirmed { color: var(--accent-confirmed); }
-.text-severe    { color: var(--accent-severe); }
+.text-open      { color: var(--accent-primary); }
+.text-confirmed { color: var(--status-confirmed); }
+.text-severe    { color: var(--severity-critical); }
 
-.text-accent-confirmed { color: var(--accent-confirmed); }
-.text-accent-open      { color: var(--accent-open); }
-.text-accent-severe    { color: var(--accent-severe); }
+.text-accent-confirmed { color: var(--status-confirmed); }
+.text-accent-open      { color: var(--accent-primary); }
+.text-accent-severe    { color: var(--severity-critical); }
 
 .font-display { font-family: var(--font-display); }
 .font-body    { font-family: var(--font-body); }
@@ -482,6 +479,6 @@ textarea.input {
 
 /* Selection */
 ::selection {
-  background: color-mix(in srgb, var(--accent-open) 25%, transparent);
+  background: color-mix(in srgb, var(--accent-primary) 25%, transparent);
   color: var(--text-primary);
 }

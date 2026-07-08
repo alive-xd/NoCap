@@ -61,7 +61,62 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div style={{ maxWidth: "800px", margin: "4rem auto", padding: "0 2rem" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", marginBottom: "1rem", color: "var(--text-primary)" }}>
+          NoCap
+        </h1>
+        <p style={{ fontSize: "1.125rem", color: "var(--text-secondary)", marginBottom: "2rem", lineHeight: 1.6 }}>
+          Evidence-backed triage, not a black-box score. Uncover the truth behind any indicator with 
+          transparent, step-by-step analysis.
+        </p>
+        
+        <div className="panel" style={{ padding: "2rem", marginBottom: "2.5rem" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", marginBottom: "1.5rem", color: "var(--text-primary)" }}>
+            Platform Features
+          </h2>
+          <ul style={{ display: "flex", flexDirection: "column", gap: "1.5rem", listStyle: "none", padding: 0, margin: 0 }}>
+            <li>
+              <div style={{ fontWeight: 500, color: "var(--text-primary)", marginBottom: "4px" }}>The Evidence Ledger</div>
+              <div style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>Every finding is backed by an itemized chain of evidence (Artifact → Parser → Evidence → Analyzer → Finding → Score), providing total transparency into the final score.</div>
+            </li>
+            <li>
+              <div style={{ fontWeight: 500, color: "var(--text-primary)", marginBottom: "4px" }}>Concurrent Multi-source Ingestion</div>
+              <div style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>Artifacts are fetched in parallel from industry OSINT sources, minimizing extraction time.</div>
+            </li>
+            <li>
+              <div style={{ fontWeight: 500, color: "var(--text-primary)", marginBottom: "4px" }}>Analyzer Library</div>
+              <div style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>Customizable analyzers process raw artifacts into standardized, actionable findings across all target types.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          <Link 
+            href="/demo/fe9c426d-d5f5-4a5f-8fd4-ae986fcb02c1" 
+            className="btn-primary" 
+            style={{ textDecoration: "none" }}
+          >
+            View Demo Case
+          </Link>
+          <Link 
+            href="/login" 
+            style={{ 
+              color: "var(--text-secondary)", 
+              textDecoration: "none", 
+              fontFamily: "var(--font-mono)", 
+              fontSize: "0.875rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em"
+            }}
+          >
+            Analyst Login →
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -184,8 +239,8 @@ export default async function DashboardPage() {
           color: var(--text-primary);
         }
 
-        .ops-value.pending { color: var(--accent-open); }
-        .ops-value.failed { color: var(--accent-severe); }
+        .ops-value.pending { color: var(--accent-primary); }
+        .ops-value.failed { color: var(--severity-critical); }
 
         .ops-label {
           font-size: 0.75rem;
@@ -221,18 +276,15 @@ export default async function DashboardPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 10px 14px;
-          border: var(--border);
-          border-radius: var(--radius-sm);
-          margin-bottom: 4px;
-          background: var(--bg-surface);
-          transition: background 0.1s, border-color 0.1s;
+          padding: 8px 0;
+          border-bottom: 1px dashed var(--text-tertiary);
+          background: transparent;
+          transition: background 0.1s;
           cursor: pointer;
         }
 
         .inv-row:hover {
-          background: var(--bg-surface-2);
-          border-color: var(--text-tertiary);
+          background: var(--bg-surface);
         }
 
         .inv-row-left {

@@ -61,6 +61,17 @@ export async function DELETE(
     .single();
   if (!inv) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // Explicit ownership check for the tag itself
+  const { data: tagCheck } = await supabase
+    .from("tags")
+    .select("user_id")
+    .eq("id", tagId)
+    .single();
+    
+  if (!tagCheck || tagCheck.user_id !== user.id) {
+    return NextResponse.json({ error: "Unauthorized to modify this tag" }, { status: 403 });
+  }
+
   await supabase
     .from("investigation_tags")
     .delete()

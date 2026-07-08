@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { confidenceLabel } from "@/lib/pipeline/confidence";
+import { MITRE_MAPPINGS } from "@/lib/attack/mitreMapping";
 import type { InvestigationDetail, Finding, Evidence, Artifact } from "@/lib/pipeline/types";
+import RadarChart from "@/components/RadarChart";
 
 const ANALYZER_BADGES: Record<string, string> = {
   VirusTotalAnalyzer: "VT",
@@ -23,7 +25,6 @@ const STATUS_LABELS: Record<string, string> = {
   EXTRACTING_EVIDENCE: "Extracting evidence…",
   RUNNING_ANALYZERS: "Running analyzers…",
   SCORING: "Computing score…",
-  GENERATING_SUMMARY: "Generating summary…",
   COMPLETED: "Completed",
   FAILED: "Failed",
 };
@@ -161,6 +162,20 @@ function FindingCard({
           <span className="finding-claim">{finding.claim}</span>
         </div>
         <div className="finding-card-right">
+          {finding.attack_techniques?.map((t) => (
+            <a
+              key={t}
+              href={MITRE_MAPPINGS[t]?.url ?? `https://attack.mitre.org/techniques/${t.split('.')[0]}/`}
+              target="_blank"
+              rel="noreferrer"
+              className="severity-badge severity-INFO"
+              style={{ textDecoration: "none" }}
+              onClick={(e) => e.stopPropagation()}
+              title={MITRE_MAPPINGS[t]?.techniqueName}
+            >
+              {t}
+            </a>
+          ))}
           <span className={`severity-badge severity-${finding.severity}`}>
             {finding.severity}
           </span>
@@ -186,10 +201,10 @@ function FindingCard({
 }
 
 function SourceStatusBar({
-  failedSources,
+  failedSources = [],
   sources,
 }: {
-  failedSources: Array<{ source: string; reason: string }>;
+  failedSources?: Array<{ source: string; reason: string }>;
   sources: string[];
 }) {
   const failedSet = new Set(failedSources.map((f) => f.source));
@@ -216,153 +231,69 @@ function SourceStatusBar({
   );
 }
 
-function StickyScorePanel({
-  score,
-  findingCount,
-  evidenceCount,
-  profileVersion,
+function EvidenceLedger({
+  investigation,
 }: {
-  score: number | null;
-  findingCount: number;
-  evidenceCount: number;
-  profileVersion: string | null;
+  investigation: InvestigationDetail;
 }) {
-  const color = score !== null ? ScoreColor(score) : "var(--text-tertiary)";
-
-  return (
-    <div className="sticky-panel" style={{ padding: "1.25rem" }}>
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "0.625rem",
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          color: "var(--text-tertiary)",
-          marginBottom: "0.75rem",
-        }}
-      >
-        NoCap Score
-      </div>
-
-      <div className="score-display" style={{ color }}>
-        {score !== null ? score : "—"}
-        <span
-          style={{
-            fontSize: "1rem",
-            color: "var(--text-tertiary)",
-            fontWeight: 400,
-          }}
-        >
-          /100
-        </span>
-      </div>
-
-      {profileVersion && (
-        <div
-          className="mono"
-          style={{
-            fontSize: "0.6875rem",
-            color: "var(--text-tertiary)",
-            marginTop: "4px",
-          }}
-        >
-          Scoring Profile v{profileVersion}
-        </div>
-      )}
-
-      <div
-        style={{
-          marginTop: "1.25rem",
-          paddingTop: "1rem",
-          borderTop: "var(--border)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}
-      >
-        {[
-          { label: "Findings", value: findingCount },
-          { label: "Evidence", value: evidenceCount },
-        ].map(({ label, value }) => (
-          <div
-            key={label}
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-          >
-            <span
-              style={{
-                fontSize: "0.75rem",
-                color: "var(--text-tertiary)",
-                fontFamily: "var(--font-mono)",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-              }}
-            >
-              {label}
-            </span>
-            <span className="mono" style={{ fontSize: "0.9375rem", color: "var(--text-primary)" }}>
-              {value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ScoreBreakdown({
-  findings,
-  score,
-  profileVersion,
-}: {
-  findings: Finding[];
-  score: number | null;
-  profileVersion: string | null;
-}) {
+  const { case_number, target, findings, final_score } = investigation;
   const sorted = [...findings].sort((a, b) => b.score_contribution - a.score_contribution);
 
   return (
-    <div className="panel" style={{ padding: "1.25rem" }}>
-      <div
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "1rem",
-          fontWeight: 500,
-          marginBottom: "1rem",
-          color: "var(--text-primary)",
-        }}
-      >
-        Score Breakdown
+    <div style={{
+      fontFamily: "var(--font-mono)",
+      border: "1px dashed var(--text-tertiary)",
+      padding: "1rem",
+      backgroundColor: "var(--bg-base)",
+      fontSize: "0.8125rem",
+      lineHeight: "1.5",
+      color: "var(--text-primary)"
+    }}>
+      {/* Header */}
+      <div style={{ borderBottom: "1px dashed var(--text-tertiary)", paddingBottom: "1rem", marginBottom: "1rem" }}>
+        <div style={{ fontWeight: 600, letterSpacing: "0.05em", marginBottom: "0.5rem" }}>THREAT SCORE LEDGER</div>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)" }}>
+          <span>CASE: {case_number}</span>
+          <span>TARGET: {target}</span>
+        </div>
       </div>
-      <div className="score-breakdown-list">
-        {sorted.map((f) => (
-          <div key={f.id} className="score-breakdown-row">
-            <span
-              className="mono"
-              style={{
-                color: f.score_contribution > 0 ? ScoreColor(f.confidence_score) : "var(--text-tertiary)",
-                minWidth: "36px",
-                fontWeight: 500,
-              }}
-            >
+      
+      {/* Radar Chart */}
+      {findings.length > 0 && (
+        <div style={{ marginBottom: "1.5rem", paddingBottom: "1rem", borderBottom: "1px dashed var(--text-tertiary)" }}>
+          <RadarChart findings={findings} />
+        </div>
+      )}
+      
+      {/* Table Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
+        <span>CONTRIBUTING FACTOR</span>
+        <span>IMPACT</span>
+      </div>
+      <div style={{ borderBottom: "1px dashed var(--text-tertiary)", marginBottom: "0.5rem" }}></div>
+      
+      {/* Items */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1rem" }}>
+        {sorted.map(f => (
+          <div key={f.id} style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ paddingRight: "1rem", wordBreak: "break-word" }}>{f.claim}</span>
+            <span style={{ 
+              color: f.score_contribution > 0 ? ScoreColor(f.confidence_score) : "var(--text-tertiary)",
+              whiteSpace: "nowrap",
+              textAlign: "right"
+            }}>
               +{f.score_contribution}
-            </span>
-            <span style={{ color: "var(--text-secondary)", flex: 1, fontSize: "0.875rem" }}>
-              {f.claim}
-            </span>
-            <span
-              className="mono"
-              style={{ fontSize: "0.6875rem", color: "var(--text-tertiary)" }}
-            >
-              {f.generated_by.replace("Analyzer", "")}
             </span>
           </div>
         ))}
-        <div className="score-breakdown-total">
-          <span className="mono" style={{ color: score !== null ? ScoreColor(score) : "var(--text-primary)", fontWeight: 600 }}>
-            {score ?? 0}
-          </span>
-          <span style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>
-            Total{profileVersion ? ` — Scoring Profile v${profileVersion}` : ""}
+      </div>
+      
+      {/* Footer */}
+      <div style={{ borderTop: "1px dashed var(--text-tertiary)", paddingTop: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600 }}>
+          <span>COMPOSITE SCORE SUMMARY</span>
+          <span style={{ color: final_score !== null ? ScoreColor(final_score) : "var(--text-primary)" }}>
+            SCORE: {final_score ?? "—"}
           </span>
         </div>
       </div>
@@ -379,8 +310,8 @@ function InvestigationTimeline({
   const findings = investigation.findings;
   const metrics = investigation.metrics;
 
-  const formatTime = (d: string) =>
-    new Date(d).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const formatTime = (d?: string | null) =>
+    d ? new Date(d).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "Unknown";
 
   const steps = [
     {
@@ -393,11 +324,11 @@ function InvestigationTimeline({
       const artFindings = findings.filter((f) =>
         f.evidence?.some((ev: Evidence) => (ev as Evidence & { artifact_id?: string }).artifact_id === art.id)
       );
-      const artEvidence = investigation.findings.flatMap((f) => f.evidence ?? []).filter(
-        (ev: Evidence) => (ev as Evidence & { artifact_id?: string }).artifact_id === art.id
+      const artEvidence = (investigation.all_evidence || []).filter(
+        (ev: Evidence) => ev.artifact_id === art.id
       );
       return {
-        time: formatTime(art.fetched_at),
+        time: formatTime(art.fetched_at || ((art as unknown) as Record<string, unknown>).created_at as string),
         label: `${art.source} artifact ${art.is_reused ? "(cached)" : "fetched"}`,
         detail: `${artEvidence.length} evidence fact${artEvidence.length !== 1 ? "s" : ""} extracted${artFindings.length > 0 ? `, ${artFindings.length} finding${artFindings.length !== 1 ? "s" : ""}` : ""}`,
         status: "completed",
@@ -523,6 +454,7 @@ export default function InvestigationDetailPage() {
   }, [id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 
@@ -582,7 +514,6 @@ export default function InvestigationDetailPage() {
   }
 
   const inProgress = !["COMPLETED", "FAILED"].includes(data.status);
-  const allEvidence = data.findings.flatMap((f) => f.evidence ?? []);
   const uniqueSources = [...new Set(data.artifacts.map((a) => a.source))];
 
   return (
@@ -962,6 +893,17 @@ export default function InvestigationDetailPage() {
                 id="add-tag-input"
               />
             </form>
+            {data.status === "COMPLETED" && (
+              <a
+                href={`/api/investigations/${id}/pdf`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem", padding: "4px 8px", marginLeft: "auto" }}
+              >
+                Download Forensic Briefing (PDF)
+              </a>
+            )}
           </div>
         </div>
 
@@ -982,6 +924,8 @@ export default function InvestigationDetailPage() {
             sources={uniqueSources}
           />
         )}
+
+
 
         {/* In-progress redaction */}
         {inProgress && (
@@ -1007,16 +951,7 @@ export default function InvestigationDetailPage() {
               </div>
             )}
 
-            {/* Score breakdown */}
-            {data.final_score !== null && (
-              <div style={{ marginBottom: "1.5rem" }}>
-                <ScoreBreakdown
-                  findings={data.findings}
-                  score={data.final_score}
-                  profileVersion={data.scoring_profile_version}
-                />
-              </div>
-            )}
+            {/* Score breakdown removed from here, now in sidebar */}
 
             {/* Timeline */}
             <div style={{ marginBottom: "1.5rem" }}>
@@ -1058,13 +993,8 @@ export default function InvestigationDetailPage() {
           </div>
 
           {/* Sticky sidebar */}
-          <div className="detail-sidebar">
-            <StickyScorePanel
-              score={data.final_score}
-              findingCount={data.findings.length}
-              evidenceCount={allEvidence.length}
-              profileVersion={data.scoring_profile_version}
-            />
+          <div className="detail-sidebar" style={{ position: "sticky", top: "1.5rem" }}>
+            <EvidenceLedger investigation={data} />
           </div>
         </div>
       </div>

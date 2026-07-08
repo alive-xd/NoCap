@@ -1,0 +1,1 @@
+ALTER TABLE public.investigations ADD COLUMN summary text;

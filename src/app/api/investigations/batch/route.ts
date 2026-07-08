@@ -28,6 +28,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Maximum 20 targets per batch" }, { status: 400 });
   }
 
+  // ── Rate Limiting ──────────────────────────────────────────────────────────
+  const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
+  const { count: recentCount, error: countError } = await supabase
+    .from("investigations")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", oneMinuteAgo);
+
+  if (!countError && recentCount !== null && (recentCount + targets.length) > 5) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded (max 5 investigations per minute). Please wait before trying again." },
+      { status: 429 }
+    );
+  }
+
   // Create all investigation records first (synchronous — needed for response)
   const results: Array<{ target: string; id: string; status: string; error?: string }> = [];
 

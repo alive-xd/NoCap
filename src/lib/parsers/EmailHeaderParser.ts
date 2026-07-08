@@ -30,6 +30,7 @@ interface ReceivedHop {
   date: string | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function extractDomain(email: string): string | null {
   // Extract domain from email address or bare domain
   const match = email.match(/@([a-zA-Z0-9.-]+)|^([a-zA-Z0-9.-]+\.[a-z]{2,})$/);

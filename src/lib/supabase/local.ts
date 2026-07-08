@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+import fs from "fs";
+
 /**
  * Local development database — in-memory store that mimics the Supabase
  * query builder interface. Returns proper Promises so Next.js server
@@ -9,7 +12,11 @@
 // ── In-memory stores ───────────────────────────────────────────────────────────
 // These are module-level so they persist across requests in dev (HMR resets them)
 
-const stores: Record<string, Map<string, Record<string, unknown>>> = {
+const globalForStores = global as unknown as {
+  stores?: Record<string, Map<string, Record<string, unknown>>>;
+};
+
+const stores: Record<string, Map<string, Record<string, unknown>>> = globalForStores.stores || {
   investigations: new Map(),
   artifacts: new Map(),
   evidence: new Map(),
@@ -33,6 +40,10 @@ const stores: Record<string, Map<string, Record<string, unknown>>> = {
     ],
   ]),
 };
+
+if (process.env.NODE_ENV !== "production") {
+  globalForStores.stores = stores;
+}
 
 function uuid(): string {
   return crypto.randomUUID();
@@ -294,5 +305,6 @@ export function createLocalClient() {
 }
 
 export const isLocalMode =
-  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL === "https://your-project-id.supabase.co";
+  process.env.NODE_ENV !== "production" &&
+  (!process.env.NEXT_PUBLIC_SUPABASE_URL ||
+   process.env.NEXT_PUBLIC_SUPABASE_URL === "https://your-project-id.supabase.co");

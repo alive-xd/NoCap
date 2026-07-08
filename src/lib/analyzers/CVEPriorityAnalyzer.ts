@@ -124,6 +124,7 @@ export class CVEPriorityAnalyzer implements Analyzer {
         confidence_score: confidence,
         score_contribution: Math.min(priorityScore, 20),
         reasoning: `CVSS: ${cvssScore}/10. ${exploitStr}. Published ${Math.round(daysSincePublish)} days ago. Composite priority score: ${priorityScore}/100 (CVSS 50% + exploit 30% + recency 20%). ${description.slice(0, 200)}${description.length > 200 ? "…" : ""}`,
+        attack_techniques: ['T1588.006'],
         evidence_ids: getEvidenceIds(
           input.evidence,
           "cve_id",

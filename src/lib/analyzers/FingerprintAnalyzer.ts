@@ -96,6 +96,7 @@ export class FingerprintAnalyzer implements Analyzer {
         confidence_score: 70,
         score_contribution: thresholds.exposedStackScoreContrib,
         reasoning: `Server technology identifiable from response headers and path probes: ${identifiers.join("; ")}. Exposing server software and framework versions aids targeted exploitation by providing attackers with a precise attack surface.`,
+        attack_techniques: ['T1592'],
         evidence_ids: getEvidenceIds(
           input.evidence,
           "server_header",
@@ -130,6 +131,7 @@ export class FingerprintAnalyzer implements Analyzer {
         confidence_score: confidence,
         score_contribution: thresholds.missingHeaderScoreContrib,
         reasoning: `Missing security headers: ${allMissing.join(", ")}. Critical missing: ${criticalMissing.length > 0 ? criticalMissing.join(", ") : "none"}. Present: ${presentHeaders.length > 0 ? presentHeaders.join(", ") : "none"}. Based on OWASP Secure Headers Project and Mozilla Observatory recommendations.`,
+        attack_techniques: ['T1592'],
         evidence_ids: getEvidenceIds(
           input.evidence,
           "missing_security_headers",

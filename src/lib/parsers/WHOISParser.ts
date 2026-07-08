@@ -93,7 +93,7 @@ function findArrayField(
     const val = obj[field];
     if (val) {
       if (Array.isArray(val)) return val.map(String);
-      if (typeof val === "string") {
+      if (typeof val === "string" && val.trim().length > 0) {
         return val
           .split(/\s+/)
           .map((s) => s.trim().toLowerCase())

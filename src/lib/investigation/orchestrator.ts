@@ -20,7 +20,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { createLocalClient, isLocalMode } from "@/lib/supabase/local";
 import { generateCaseNumber } from "./caseNumber";
-import { detectIOCType, extractDomainFromIOC, isDomainLike } from "./iocDetector";
+import { extractDomainFromIOC, isDomainLike } from "./iocDetector";
 import { computeScore } from "./scoring";
 
 // ── API Clients ───────────────────────────────────────────────────────────────
@@ -31,6 +31,7 @@ import { fetchIPASN } from "@/lib/apis/ipasn";
 import { fetchCrtSh } from "@/lib/apis/crtsh";
 import { searchGitHubCode } from "@/lib/apis/github-search";
 import { fetchNVDById } from "@/lib/apis/nvd";
+
 
 
 // ── Parsers ───────────────────────────────────────────────────────────────────
@@ -233,6 +234,7 @@ async function runAnalyzerAndPersist(
         generated_by: analyzer.config.name,
         analyzer_version: analyzer.config.version,
         reasoning: pf.reasoning,
+        attack_techniques: pf.attack_techniques ?? [],
       })
       .select("id")
       .single();
@@ -264,6 +266,9 @@ export interface OrchestratorOptions {
   target: string;
   targetType: TargetType;
 }
+
+
+
 
 export async function runIOCInvestigation(
   options: OrchestratorOptions
@@ -302,8 +307,8 @@ export async function runIOCInvestigation(
     },
     {
       name: "abuseipdb",
-      fetch: () => fetchAbuseIPDB(target),
-      enabled: isIP,
+      fetch: () => fetchAbuseIPDB(domain ?? target),
+      enabled: isIP || !!domain,
     },
     {
       name: "whois",
@@ -312,8 +317,8 @@ export async function runIOCInvestigation(
     },
     {
       name: "ipasn",
-      fetch: () => fetchIPASN(target),
-      enabled: isIP,
+      fetch: () => fetchIPASN(domain ?? target),
+      enabled: isIP || !!domain,
     },
     {
       name: "domainstring",
@@ -487,10 +492,12 @@ export async function runIOCInvestigation(
     totalSources
   );
 
+  
+
   // ── COMPLETED ─────────────────────────────────────────────────────────────
 
   await db.from("investigations").update({
-    status: "COMPLETED",
+        status: "COMPLETED",
     final_score: scoreResult.finalScore,
     scoring_profile_version: profileRow?.version ?? "1.0",
     failed_sources: failedSources,
@@ -928,7 +935,7 @@ export async function runCVEInvestigation(
   try {
     // 1. Fetch NVD detail
     const nvdRaw = await fetchNVDById(target);
-    const vulnList = (nvdRaw.vulnerabilities as any[]) ?? [];
+    const vulnList = (nvdRaw.vulnerabilities as Record<string, unknown>[]) ?? [];
     const cveObj = vulnList[0]?.cve ?? { id: target };
 
     // 2. Fetch Exploit status in parallel
@@ -1038,9 +1045,11 @@ export async function runCVEInvestigation(
     1
   );
 
+  
+
   // ── COMPLETED ─────────────────────────────────────────────────────────────
   await db.from("investigations").update({
-    status: "COMPLETED",
+        status: "COMPLETED",
     final_score: scoreResult.finalScore,
     scoring_profile_version: profileRow?.version ?? "1.0",
     failed_sources: failedSources,

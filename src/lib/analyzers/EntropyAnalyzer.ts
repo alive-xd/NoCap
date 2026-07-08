@@ -118,6 +118,7 @@ export class EntropyAnalyzer implements Analyzer {
         confidence_score: confidence,
         score_contribution: score,
         reasoning: `Domain string: "${domainString}" (SLD: "${sld}"). ${signals.join(". ")}. High character entropy commonly correlates with algorithmically generated domains used in malware C2 infrastructure. Threshold of ${thresholds.entropyFlag} derived from Antonakakis et al. (USENIX Security 2012) and validated against Alexa Top 1M.`,
+        attack_techniques: ['T1568.002'],
         evidence_ids: getEvidenceIds(
           input.evidence,
           "entropy_score",

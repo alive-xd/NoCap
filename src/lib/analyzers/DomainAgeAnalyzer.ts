@@ -110,6 +110,7 @@ export class DomainAgeAnalyzer implements Analyzer {
         confidence_score: confidence,
         score_contribution: scoreContribution,
         reasoning: `Domain registered ${ageDaysFormatted} ago (${registrationDate.slice(0, 10)}). Domains registered within 30 days are disproportionately used in phishing and malware campaigns before appearing on blocklists. Decay-weighted score: ${scoreContribution}/15.`,
+        attack_techniques: ['T1583.001'],
         evidence_ids: getEvidenceIds(input.evidence, "registration_date"),
       },
     ];

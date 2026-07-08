@@ -36,31 +36,32 @@ interface AbuseASNEntry {
   tier: 1 | 2;
   reason: string;
   source: string;
+  hostingType: "vps" | "server";
 }
 
 // Curated list — compiled from Spamhaus, Feodo Tracker, abuse.ch, GreyNoise
 // Last reviewed: 2024-Q4. ASN numbers only — names provided for transparency.
 const ABUSIVE_ASNS: AbuseASNEntry[] = [
   // ── TIER 1: Consistently flagged, high-malware density ─────────────────────
-  { asn: 9009,  name: "M247 Ltd",               tier: 1, reason: "Frequent bulletproof hosting provider for malware C2 and spam", source: "Spamhaus ASN-DROP, Feodo Tracker" },
-  { asn: 49981, name: "WorldStream",             tier: 1, reason: "High density of Feodo/Emotet C2 servers",                      source: "Feodo Tracker" },
-  { asn: 60068, name: "CDN77",                   tier: 1, reason: "Repeatedly hosting phishing kits and malware distribution",     source: "abuse.ch URLhaus" },
-  { asn: 136907,name: "Huawei Cloud",            tier: 1, reason: "High scan and exploit activity from this block",               source: "GreyNoise, Shodan mass scanner reports" },
-  { asn: 134548,name: "DXTL Tseung Kwan O Industries", tier: 1, reason: "Bulletproof hosting associated with Cobalt Strike C2",   source: "Feodo Tracker" },
-  { asn: 14576, name: "Hosting Solution Ltd",    tier: 1, reason: "Consistently listed in Spamhaus ASN-DROP",                     source: "Spamhaus ASN-DROP" },
-  { asn: 48666, name: "LLC Masterhost",          tier: 1, reason: "Russian hosting provider with sustained Spamhaus listing",     source: "Spamhaus ASN-DROP" },
-  { asn: 57523, name: "Chang Way Technologies",  tier: 1, reason: "Bulletproof hosting for malware campaigns",                    source: "Feodo Tracker, abuse.ch" },
-  { asn: 206728,name: "Media Land LLC",          tier: 1, reason: "Known bulletproof hosting network for ransomware affiliate panels", source: "Feodo Tracker" },
-  { asn: 202422,name: "G-Core Labs",             tier: 2, reason: "Used by threat actors for C2 alongside legitimate CDN use",   source: "Feodo Tracker" },
+  { asn: 9009,  name: "M247 Ltd",               tier: 1, reason: "Frequent bulletproof hosting provider for malware C2 and spam", source: "Spamhaus ASN-DROP, Feodo Tracker", hostingType: "server" },
+  { asn: 49981, name: "WorldStream",             tier: 1, reason: "High density of Feodo/Emotet C2 servers",                      source: "Feodo Tracker", hostingType: "server" },
+  { asn: 60068, name: "CDN77",                   tier: 1, reason: "Repeatedly hosting phishing kits and malware distribution",     source: "abuse.ch URLhaus", hostingType: "server" },
+  { asn: 136907,name: "Huawei Cloud",            tier: 1, reason: "High scan and exploit activity from this block",               source: "GreyNoise, Shodan mass scanner reports", hostingType: "server" },
+  { asn: 134548,name: "DXTL Tseung Kwan O Industries", tier: 1, reason: "Bulletproof hosting associated with Cobalt Strike C2",   source: "Feodo Tracker", hostingType: "server" },
+  { asn: 14576, name: "Hosting Solution Ltd",    tier: 1, reason: "Consistently listed in Spamhaus ASN-DROP",                     source: "Spamhaus ASN-DROP", hostingType: "server" },
+  { asn: 48666, name: "LLC Masterhost",          tier: 1, reason: "Russian hosting provider with sustained Spamhaus listing",     source: "Spamhaus ASN-DROP", hostingType: "server" },
+  { asn: 57523, name: "Chang Way Technologies",  tier: 1, reason: "Bulletproof hosting for malware campaigns",                    source: "Feodo Tracker, abuse.ch", hostingType: "server" },
+  { asn: 206728,name: "Media Land LLC",          tier: 1, reason: "Known bulletproof hosting network for ransomware affiliate panels", source: "Feodo Tracker", hostingType: "server" },
+  { asn: 202422,name: "G-Core Labs",             tier: 2, reason: "Used by threat actors for C2 alongside legitimate CDN use",   source: "Feodo Tracker", hostingType: "server" },
   // ── TIER 2: High abuse density, mixed use ─────────────────────────────────
-  { asn: 16276, name: "OVH SAS",                 tier: 2, reason: "Large hoster; high absolute volume of malware-hosting IPs",   source: "abuse.ch URLhaus statistics" },
-  { asn: 14061, name: "DigitalOcean",            tier: 2, reason: "Frequently abused for VPS-based attack infrastructure",        source: "GreyNoise scanner reports" },
-  { asn: 20473, name: "Vultr Holdings",          tier: 2, reason: "Frequently abused for scanner and C2 infrastructure",          source: "GreyNoise, Feodo Tracker" },
-  { asn: 37963, name: "Alibaba Cloud",           tier: 2, reason: "High scan density from this block in GreyNoise data",          source: "GreyNoise" },
-  { asn: 45090, name: "Shenzhen Tencent Computer Systems", tier: 2, reason: "Frequent source of automated scans and abuse",       source: "GreyNoise, abuse.ch" },
-  { asn: 4134,  name: "China Telecom",           tier: 2, reason: "High volume of malicious traffic; Spamhaus listings",          source: "Spamhaus, GreyNoise" },
-  { asn: 4837,  name: "China Unicom",            tier: 2, reason: "Persistent Spamhaus listings and scan traffic",                source: "Spamhaus ASN-DROP" },
-  { asn: 9808,  name: "Guangdong Mobile Communication", tier: 2, reason: "High scan density in GreyNoise mass-scanner data",      source: "GreyNoise" },
+  { asn: 16276, name: "OVH SAS",                 tier: 2, reason: "Large hoster; high absolute volume of malware-hosting IPs",   source: "abuse.ch URLhaus statistics", hostingType: "vps" },
+  { asn: 14061, name: "DigitalOcean",            tier: 2, reason: "Frequently abused for VPS-based attack infrastructure",        source: "GreyNoise scanner reports", hostingType: "vps" },
+  { asn: 20473, name: "Vultr Holdings",          tier: 2, reason: "Frequently abused for scanner and C2 infrastructure",          source: "GreyNoise, Feodo Tracker", hostingType: "vps" },
+  { asn: 37963, name: "Alibaba Cloud",           tier: 2, reason: "High scan density from this block in GreyNoise data",          source: "GreyNoise", hostingType: "vps" },
+  { asn: 45090, name: "Shenzhen Tencent Computer Systems", tier: 2, reason: "Frequent source of automated scans and abuse",       source: "GreyNoise, abuse.ch", hostingType: "vps" },
+  { asn: 4134,  name: "China Telecom",           tier: 2, reason: "High volume of malicious traffic; Spamhaus listings",          source: "Spamhaus, GreyNoise", hostingType: "server" },
+  { asn: 4837,  name: "China Unicom",            tier: 2, reason: "Persistent Spamhaus listings and scan traffic",                source: "Spamhaus ASN-DROP", hostingType: "server" },
+  { asn: 9808,  name: "Guangdong Mobile Communication", tier: 2, reason: "High scan density in GreyNoise mass-scanner data",      source: "GreyNoise", hostingType: "server" },
 ];
 
 const ASN_MAP = new Map<number, AbuseASNEntry>(
@@ -116,6 +117,7 @@ export class ASNReputationAnalyzer implements Analyzer {
           ? thresholds.tier1ScoreContribution
           : thresholds.tier2ScoreContribution,
         reasoning: `ASN ${asnString} (${entry.name ?? org}) is on the NoCap abuse ASN list (Tier ${entry.tier}). Reason: ${entry.reason}. Sources: ${entry.source}. Tier 1 = predominantly malicious infrastructure; Tier 2 = high abuse density with some legitimate traffic.`,
+        attack_techniques: [entry.hostingType === "vps" ? "T1583.003" : "T1583.004"],
         evidence_ids: getEvidenceIds(
           input.evidence,
           "asn_number",

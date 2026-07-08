@@ -40,6 +40,7 @@ export default function EvidenceExplorerPage() {
     if (sourceFilter) params.set("source", sourceFilter);
     if (parserFilter) params.set("parser", parserFilter);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fetch(`/api/evidence?${params}`)
       .then((r) => r.json())

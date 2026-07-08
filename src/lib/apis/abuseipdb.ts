@@ -5,6 +5,9 @@
  * Docs: https://docs.abuseipdb.com/#check-endpoint
  */
 
+import { promises as dns } from "dns";
+import { isIPv4, isIPv6 } from "net";
+
 const ABUSEIPDB_BASE = "https://api.abuseipdb.com/api/v2";
 
 /**
@@ -20,8 +23,23 @@ export async function fetchAbuseIPDB(
     throw new Error("ABUSEIPDB_API_KEY is not configured");
   }
 
+  let resolvedIp = ip;
+  // Resolve domain to IP if it's not already an IP address
+  if (!isIPv4(ip) && !isIPv6(ip)) {
+    try {
+      const addresses = await dns.resolve4(ip);
+      if (addresses.length > 0) {
+        resolvedIp = addresses[0];
+      } else {
+        throw new Error("No IP addresses found for domain");
+      }
+    } catch (err) {
+      throw new Error(`DNS resolution failed for ${ip}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   const params = new URLSearchParams({
-    ipAddress: ip,
+    ipAddress: resolvedIp,
     maxAgeInDays: maxAgeInDays.toString(),
     verbose: "false",
   });
