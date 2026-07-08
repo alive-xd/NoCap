@@ -17,6 +17,20 @@
 
 ---
 
+## 🚀 Live Demo & Credentials
+
+**Public Live Instance:** [https://nocap.vercel.app](https://nocap.vercel.app) *(Update this with your actual Vercel URL)*
+
+To test the application as an analyst, you can use the following demo credentials:
+* **Email:** `demo@nocap.com` *(Update with your actual demo email)*
+* **Password:** `demo1234` *(Update with your actual demo password)*
+
+**Public Read-Only Case Sharing:**
+You can view a read-only investigation without logging in by visiting a public demo link:
+* [View Public Investigation Demo](https://nocap.vercel.app/demo/example-case-id) *(Update with a real case ID)*
+
+---
+
 ## 🌟 Overview
 
 **NoCap** is an enterprise-grade, evidence-backed threat intelligence triage workspace. 
