@@ -15,7 +15,6 @@ export type InvestigationStatus =
   | "EXTRACTING_EVIDENCE"
   | "RUNNING_ANALYZERS"
   | "SCORING"
-  | "GENERATING_SUMMARY"
   | "COMPLETED"
   | "FAILED";
 
@@ -38,7 +37,7 @@ export interface Investigation {
   scoring_profile_version: string | null;
   failed_sources: FailedSource[];
   is_public_demo: boolean;
-  summary?: string | null;
+
   created_at: string;
   completed_at: string | null;
 }

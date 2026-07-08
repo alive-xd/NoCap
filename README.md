@@ -18,21 +18,17 @@
 
 ## Live Demo & Credentials
 
-**Public Live Instance:** [https://nocap-platform.vercel.app](https://nocap-platform.vercel.app)
+**Public Live Instance:** [https://nocap-2ml7e6h98-alivexds-projects.vercel.app](https://nocap-2ml7e6h98-alivexds-projects.vercel.app)
 
 To test the application as an analyst, you can use the following demo credentials:
 * **Email:** `demo@nocap.com`
 * **Password:** `demo1234`
 
-**Public Read-Only Case Sharing:**
-You can view a read-only investigation without logging in by visiting a public demo link:
-* [View Public Investigation Demo](https://nocap-platform.vercel.app/demo/f47ac10b-58cc-4372-a567-0e02b2c3d479)
-
 ---
 
 ## Overview
 
-**NoCap** is an enterprise-grade, evidence-backed threat intelligence triage workspace. 
+**NoCap** is a threat intelligence triage workspace that separates raw API fetching, parsing, analysis, and scoring into distinct stages so every score is traceable back to raw evidence. 
 
 Unlike traditional "black-box" reputation scanners that output arbitrary malicious scores without context, NoCap is built on a strict **immutable evidence chain**. Every score, indicator, or severity warning is traceable back to the raw JSON response and HTTP bytes that produced it. Analysts can inspect any finding, click on its score contribution, and view the raw payload behind the alert.
 
@@ -98,7 +94,7 @@ The following complex end-to-end security test suites verify NoCap's security bo
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 NoCap enforces a strict, decoupled request lifecycle:
 
@@ -127,7 +123,7 @@ graph TD
 
 ---
 
-## 🔄 SOC Investigation Lifecycle
+## SOC Investigation Lifecycle
 
 Below is the exact workflow trace when a target (e.g. `185.190.140.9`) is analyzed:
 
@@ -149,7 +145,7 @@ Target Input (185.190.140.9)
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
 The database relies on strict row-level security (RLS) to enforce tenant isolation across a cascading 9-table schema:
 
@@ -202,7 +198,7 @@ erDiagram
 
 ---
 
-## 🔌 API Specifications (Strict Boundaries)
+## API Specifications (Strict Boundaries)
 
 ### Submit Target for Investigation (POST `/api/investigations`)
 - **Headers:** `Cookie: session` OR `Authorization: Bearer <token>`
@@ -221,7 +217,7 @@ erDiagram
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Domain | Technology | Description |
 | :--- | :--- | :--- |
@@ -233,7 +229,7 @@ erDiagram
 
 ---
 
-## 🚀 Deployment Guide (Vercel)
+## Deployment Guide (Vercel)
 
 Making NoCap public and deploying it is incredibly straightforward using Vercel and Supabase.
 
@@ -277,10 +273,10 @@ npm run dev
 
 ---
 
-## 🤝 Contributing
+## Contributing
 Please review our Contributing Guide for pipeline design regulations, testing specifications, and pull request guidelines.
 
 ---
 
-## 📜 License
+## License
 NoCap is open-source software licensed under the **MIT License** - see the `LICENSE` file for details.

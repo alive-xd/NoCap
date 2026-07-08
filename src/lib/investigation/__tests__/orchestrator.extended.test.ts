@@ -95,9 +95,7 @@ describe("runAttackSurfaceInvestigation", () => {
   it("1. Target host returns a non-2xx status (500) -> pipeline completes properly without crashing", async () => {
     // Mock fetch for OpenRouter (so pipeline doesn't fail there) and probeHTTP
     global.fetch = vi.fn().mockImplementation(async (url: any) => {
-      if (url.includes("openrouter")) {
-        return { ok: true, json: async () => ({ choices: [{ message: { content: "summary" } }] }) };
-      }
+
       // For probeHTTP
       return {
         status: 500,
@@ -127,9 +125,7 @@ describe("runAttackSurfaceInvestigation", () => {
 
   it("2. probeHTTP fetch itself rejects (e.g. connection refused) -> recorded as failed source, completes", async () => {
     global.fetch = vi.fn().mockImplementation(async (url: any) => {
-      if (url.includes("openrouter")) {
-        return { ok: true, json: async () => ({ choices: [{ message: { content: "summary" } }] }) };
-      }
+
       throw new Error("Connection refused");
     });
 
@@ -171,9 +167,7 @@ describe("runCVEInvestigation", () => {
 
   it("1. CISA KEV fetch rejects/times out -> falls back to false without crashing", async () => {
     global.fetch = vi.fn().mockImplementation(async (url: string) => {
-      if (url.includes("openrouter")) {
-        return { ok: true, json: async () => ({ choices: [{ message: { content: "summary" } }] }) };
-      }
+
       if (url.includes("cisa.gov")) {
         throw new Error("Timeout");
       }
@@ -202,9 +196,7 @@ describe("runCVEInvestigation", () => {
 
   it("2. Exploit-DB fetch returns malformed unexpected format -> falls back safely", async () => {
     global.fetch = vi.fn().mockImplementation(async (url: string) => {
-      if (url.includes("openrouter")) {
-        return { ok: true, json: async () => ({ choices: [{ message: { content: "summary" } }] }) };
-      }
+
       if (url.includes("cisa.gov")) {
         return { ok: true, json: async () => ({ vulnerabilities: [] }) };
       }
@@ -235,9 +227,7 @@ describe("runCVEInvestigation", () => {
 
   it("3. Both external checks fail simultaneously -> investigation still reaches COMPLETED", async () => {
     global.fetch = vi.fn().mockImplementation(async (url: string) => {
-      if (url.includes("openrouter")) {
-        return { ok: true, json: async () => ({ choices: [{ message: { content: "summary" } }] }) };
-      }
+
       if (url.includes("cisa.gov")) {
         throw new Error("Failed");
       }

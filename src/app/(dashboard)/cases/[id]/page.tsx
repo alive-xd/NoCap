@@ -36,7 +36,7 @@ function ScoreColor(score: number): string {
   return "var(--severity-low)";
 }
 
-function StampBadge({ status }: { status: string }) {
+function StampBadge({ status, onClick, interactive }: { status: string; onClick?: (e: React.MouseEvent) => void; interactive?: boolean }) {
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -44,8 +44,13 @@ function StampBadge({ status }: { status: string }) {
     return () => clearTimeout(t);
   }, []);
 
-  const cls = `finding-status status-${status} ${animated ? "stamp-animate" : ""}`;
-  return <span className={cls}>{status.replace("_", " ")}</span>;
+  const cls = `finding-status status-${status} ${animated ? "stamp-animate" : ""} ${interactive ? "interactive-badge" : ""}`;
+  return (
+    <span className={cls} onClick={onClick} style={interactive ? { cursor: "pointer" } : {}}>
+      {status.replace("_", " ")}
+      {interactive && <span style={{ marginLeft: "4px", fontSize: "0.6rem" }}>▼</span>}
+    </span>
+  );
 }
 
 function EvidencePanelContent({
@@ -125,6 +130,12 @@ function EvidencePanelContent({
           )}
         </div>
       )}
+      {(finding as any).disposition_note && (
+        <div style={{ marginTop: "12px", padding: "8px", background: "var(--bg-surface)", borderLeft: "2px solid var(--accent-open)", fontSize: "0.8125rem", borderRadius: "0 4px 4px 0" }}>
+          <div style={{ color: "var(--text-tertiary)", fontSize: "0.6875rem", textTransform: "uppercase", marginBottom: "4px", fontFamily: "var(--font-mono)" }}>Analyst Disposition Note</div>
+          <div style={{ color: "var(--text-primary)" }}>{(finding as any).disposition_note}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -132,13 +143,39 @@ function EvidencePanelContent({
 function FindingCard({
   finding,
   artifacts,
+  isCompleted,
+  onUpdateDisposition,
 }: {
-  finding: Finding & { evidence?: Evidence[] };
+  finding: Finding & { evidence?: Evidence[], disposition_note?: string | null };
   artifacts: Artifact[];
+  isCompleted?: boolean;
+  onUpdateDisposition?: (status: string, note?: string) => Promise<any>;
 }) {
   const [open, setOpen] = useState(false);
+  const [showDispositionForm, setShowDispositionForm] = useState(false);
+  const [dispositionStatus, setDispositionStatus] = useState("CONFIRMED");
+  const [dispositionNote, setDispositionNote] = useState("");
+  const [savingDisposition, setSavingDisposition] = useState(false);
+
   const badge = ANALYZER_BADGES[finding.generated_by] ?? finding.generated_by.slice(0, 4).toUpperCase();
   const conf = confidenceLabel(finding.confidence_score);
+
+  const handleDispositionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCompleted && onUpdateDisposition) {
+      setShowDispositionForm(!showDispositionForm);
+    }
+  };
+
+  const submitDisposition = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onUpdateDisposition) return;
+    setSavingDisposition(true);
+    await onUpdateDisposition(dispositionStatus, dispositionNote);
+    setSavingDisposition(false);
+    setShowDispositionForm(false);
+    setDispositionNote("");
+  };
 
   return (
     <div className="finding-card evidence-tag">
@@ -186,12 +223,55 @@ function FindingCard({
             {finding.confidence_score}
             <span style={{ marginLeft: "2px", opacity: 0.6 }}>({conf})</span>
           </span>
-          <StampBadge status={finding.status} />
+          <StampBadge 
+            status={finding.status} 
+            onClick={handleDispositionClick} 
+            interactive={isCompleted && !!onUpdateDisposition} 
+          />
           <span style={{ color: "var(--text-tertiary)", fontSize: "0.875rem" }}>
             {open ? "▲" : "▼"}
           </span>
         </div>
       </div>
+
+      {showDispositionForm && (
+        <div style={{ padding: "12px 14px", background: "var(--bg-surface-2)", borderTop: "var(--border)" }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.6875rem", textTransform: "uppercase", marginBottom: "8px", color: "var(--text-secondary)" }}>Update Disposition</div>
+          <form onSubmit={submitDisposition}>
+            <select 
+              value={dispositionStatus}
+              onChange={(e) => setDispositionStatus(e.target.value)}
+              className="input"
+              style={{ padding: "4px 8px", fontSize: "0.75rem", marginBottom: "8px", width: "100%", maxWidth: "200px", display: "block" }}
+            >
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="CLEARED">Cleared</option>
+              <option value="UNDER_REVIEW">Under Review</option>
+              <option value="FLAGGED">Flagged</option>
+            </select>
+            {["CONFIRMED", "CLEARED"].includes(dispositionStatus) && (
+              <textarea
+                value={dispositionNote}
+                onChange={(e) => setDispositionNote(e.target.value)}
+                className="input"
+                placeholder="Reasoning (min 10 chars)..."
+                rows={2}
+                style={{ fontSize: "0.75rem", marginBottom: "8px", width: "100%" }}
+                required
+                minLength={10}
+              />
+            )}
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button type="submit" className="btn btn-secondary" disabled={savingDisposition || (["CONFIRMED", "CLEARED"].includes(dispositionStatus) && dispositionNote.length < 10)} style={{ fontSize: "0.75rem", padding: "4px 8px" }}>
+                {savingDisposition ? "Saving..." : "Save"}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setShowDispositionForm(false)} style={{ fontSize: "0.75rem", padding: "4px 8px" }}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {open && (
         <EvidencePanelContent finding={finding} artifacts={artifacts} />
@@ -498,6 +578,18 @@ export default function InvestigationDetailPage() {
       body: JSON.stringify({ tagId }),
     });
     fetchData();
+  };
+
+  const handleUpdateDisposition = async (findingId: string, status: string, note?: string) => {
+    const res = await fetch(`/api/investigations/${id}/findings/${findingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, note }),
+    });
+    if (res.ok) {
+      fetchData();
+    }
+    return res;
   };
 
   if (error) return (
@@ -945,7 +1037,13 @@ export default function InvestigationDetailPage() {
                 <div className="section-title">Findings ({data.findings.length})</div>
                 <div className="findings-list">
                   {data.findings.map((f) => (
-                    <FindingCard key={f.id} finding={f} artifacts={data.artifacts} />
+                    <FindingCard 
+                      key={f.id} 
+                      finding={f as any} 
+                      artifacts={data.artifacts} 
+                      isCompleted={data.status === "COMPLETED"}
+                      onUpdateDisposition={(status, note) => handleUpdateDisposition(f.id, status, note)}
+                    />
                   ))}
                 </div>
               </div>

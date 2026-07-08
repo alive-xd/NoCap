@@ -82,20 +82,11 @@ vi.mock("@/lib/supabase/local", () => ({
 }));
 
 describe("runIOCInvestigation", () => {
-  const originalFetch = global.fetch;
-  const originalEnv = process.env;
-
   beforeEach(() => {
     vi.clearAllMocks();
     globalUpdates.length = 0;
     globalInserts.length = 0;
     tableMocks.findingsData = [];
-    process.env = { ...originalEnv, OPENROUTER_API_KEY: "test-key" };
-    
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ choices: [{ message: { content: "Mocked AI Summary." } }] }),
-    });
 
     (fetchVirusTotal as any).mockResolvedValue({ data: {} });
     (fetchAbuseIPDB as any).mockResolvedValue({ data: {} });
@@ -104,8 +95,6 @@ describe("runIOCInvestigation", () => {
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
-    process.env = originalEnv;
   });
 
   it("1. Happy path: all sources succeed -> ends in COMPLETED with correct final_score", async () => {
@@ -188,61 +177,9 @@ describe("runIOCInvestigation", () => {
     const failedUpdate = globalUpdates.find(u => u.table === "investigations" && u.data.status === "FAILED");
     expect(failedUpdate).toBeDefined();
 
-    // Ensure we didn't score or generate a summary
+    // Ensure we didn't score
     const completedUpdate = globalUpdates.find(u => u.table === "investigations" && u.data.status === "COMPLETED");
     expect(completedUpdate).toBeUndefined();
-    expect(global.fetch).not.toHaveBeenCalled(); // OpenRouter should not be called
   });
 
-  it("4a. Summary generation calls OpenRouter with real findings", async () => {
-    const options = {
-      investigationId: "inv-123",
-      userId: "user-1",
-      target: "8.8.8.8",
-      targetType: "IP" as const,
-    };
-
-    tableMocks.findingsData = [
-      { id: "f1", claim: "Malicious IP", severity: "HIGH", confidence_score: 90, score_contribution: 45, reasoning: "Test reasoning" }
-    ];
-
-    await runIOCInvestigation(options);
-
-    // OpenRouter should have been fetched
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    const fetchArgs = (global.fetch as any).mock.calls[0];
-    expect(fetchArgs[0]).toBe("https://openrouter.ai/api/v1/chat/completions");
-    
-    // Assert the payload contains the real findings
-    const body = JSON.parse(fetchArgs[1].body);
-    expect(body.messages[0].content).toContain("Malicious IP");
-    expect(body.messages[0].content).toContain("Test reasoning");
-
-    // The result from our mock should be persisted in the DB
-    const completedUpdate = globalUpdates.find(u => u.table === "investigations" && u.data.status === "COMPLETED");
-    expect(completedUpdate.data.summary).toBe("Mocked AI Summary.");
-  });
-
-  it("4b. If OPENROUTER_API_KEY is unset, pipeline reaches COMPLETED with fallback message", async () => {
-    delete process.env.OPENROUTER_API_KEY;
-
-    const options = {
-      investigationId: "inv-123",
-      userId: "user-1",
-      target: "8.8.8.8",
-      targetType: "IP" as const,
-    };
-
-    await runIOCInvestigation(options);
-
-    // Should NOT call fetch
-    expect(global.fetch).not.toHaveBeenCalled();
-
-    // Should still complete
-    const completedUpdate = globalUpdates.find(u => u.table === "investigations" && u.data.status === "COMPLETED");
-    expect(completedUpdate).toBeDefined();
-    
-    // Summary should be the fallback text
-    expect(completedUpdate.data.summary).toBe("Investigation Summary unavailable — OPENROUTER_API_KEY not configured.");
-  });
 });

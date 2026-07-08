@@ -1,14 +1,6 @@
 # Security Policy
 
-## Supported Versions
 
-Only the latest release version of NoCap receives security patches.
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-
----
 
 ## Reporting a Vulnerability
 
