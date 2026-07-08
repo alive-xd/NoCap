@@ -49,16 +49,16 @@ Unlike traditional "black-box" reputation scanners that output arbitrary malicio
 
 ---
 
-## 📊 Project Statistics
+## 📊 Project Architecture Traits
 
-| Component | Metric / Scope |
+| Component | Reality-Backed Implementation |
 | :--- | :--- |
-| **Frontend Layouts** | 8 Custom Case-File Viewports + 1 Public Demo Route |
-| **Ingestion Pipeline** | Decoupled Ingest ➔ Parse ➔ Analyze |
-| **Database Tables** | 7 Tables with cascading deletes |
-| **Intelligence Feeds** | VirusTotal, AbuseIPDB, ip-api.com, WHOIS, crt.sh, NVD |
-| **API Endpoints** | 10 REST Handlers + CVE Cron Scheduler |
-| **Local Cache Speed** | < 50ms read response on cache hits |
+| **Frontend Layouts** | Next.js 15 App Router with private Investigator Dashboards & Public Case-Sharing Views |
+| **Ingestion Pipeline** | Decoupled execution flow: Ingest (Fetchers) ➔ Parse (Extractors) ➔ Analyze (Stateless Analyzers) |
+| **Database Security** | Strict PostgreSQL Row-Level Security (RLS) enforcing Tenant Isolation across all tables |
+| **Intelligence Feeds** | Real integrations with VirusTotal, AbuseIPDB, ip-api.com, WHOIS, crt.sh, and NVD |
+| **API Boundary** | Strict 401 JSON authorization (no 307 redirects) + JWT Bearer token support |
+| **Environment Integrity** | `VERCEL_ENV` Fail-Closed gates preventing test-bypasses from reaching production |
 
 ---
 
@@ -125,6 +125,100 @@ graph TD
     class Artifacts,Evidence,Findings store;
     class Orchestrator,Parsers,Analyzers,Scoring component;
 ```
+
+---
+
+## 🔄 SOC Investigation Lifecycle
+
+Below is the exact workflow trace when a target (e.g. `185.190.140.9`) is analyzed:
+
+```
+Target Input (185.190.140.9)
+     │
+     ▼
+[Artifact Created] ────► Fetches raw JSON from VirusTotal, AbuseIPDB, ip-api concurrently
+     │
+     ▼
+[Evidence Extracted] ──► Parsers slice atomic facts: malicious_count (14), asn_number (9009)
+     │
+     ▼
+[Findings Generated] ──► Stateless Analyzers run. ASNReputation rules trigger on M247 Ltd (abusive ASN)
+     │
+     ▼
+[Score Compiled] ─────► Radar Chart categories map generated findings; Threat Score clamps deduplicated claims (e.g. 42 - Suspicious)
+```
+
+---
+
+## 🗄️ Database Schema
+
+The database relies on strict row-level security (RLS) to enforce tenant isolation across a cascading 9-table schema:
+
+```mermaid
+erDiagram
+    investigations ||--o{ artifacts : "has"
+    investigations ||--o{ findings : "contains"
+    investigations ||--o{ notes : "owns (via RLS)"
+    investigations ||--o{ investigation_tags : "categorizes"
+    artifacts ||--o{ evidence : "yields"
+    findings ||--o{ finding_evidence : "backed_by"
+    evidence ||--o{ finding_evidence : "proves"
+    tags ||--o{ investigation_tags : "linked_to"
+    
+    investigations {
+        uuid id PK
+        uuid user_id FK "RLS Bound"
+        text case_number
+        text target
+        boolean is_public
+        text summary
+        int final_score
+    }
+    artifacts {
+        uuid id PK
+        uuid investigation_id FK
+        text source
+        jsonb raw_response
+    }
+    findings {
+        uuid id PK
+        uuid investigation_id FK
+        text claim
+        int score_contribution
+        text[] attack_techniques
+    }
+    evidence {
+        uuid id PK
+        uuid artifact_id FK
+        text fact_type
+        jsonb fact_value
+    }
+    notes {
+        uuid id PK
+        uuid investigation_id FK
+        uuid user_id FK "RLS Bound"
+        text content
+    }
+```
+
+---
+
+## 🔌 API Specifications (Strict Boundaries)
+
+### Submit Target for Investigation (POST `/api/investigations`)
+- **Headers:** `Cookie: session` OR `Authorization: Bearer <token>`
+- **Payload:** `{ "target": "malicious-domain.com", "investigationType": "ioc" }`
+- **Response (201 Created):** `{ "id": "b6a7b8c9-d0e1..." }`
+- **Security:** Returns `401 Unauthorized` (JSON) if unauthenticated. Fails if rate-limited.
+
+### Fetch Case JSON Detail (GET `/api/investigations/[id]`)
+- **Headers:** `Cookie: session` OR `Authorization: Bearer <token>`
+- **Response (200 OK):** Fully hydrated JSON document mapping artifacts, evidence, and findings.
+- **Security:** Returns `404 Not Found` if `user_id` does not own the investigation (hiding the ID's existence).
+
+### Trigger CVE Watch (POST `/api/cron/cve-watch`)
+- **Headers:** `Authorization: Bearer <CRON_SECRET>`
+- **Security:** Bypasses standard Next.js user session middleware but strictly enforces the cryptographic cron secret at the route level.
 
 ---
 
