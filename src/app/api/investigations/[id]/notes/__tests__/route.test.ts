@@ -15,7 +15,7 @@ vi.mock("@/lib/supabase/server", () => ({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockImplementation(() => {
-          if (table === "investigations") return mockSupabaseQuery();
+          if (table === "investigations" || table === "notes") return mockSupabaseQuery();
           return { data: null, error: null };
         }),
         update: vi.fn().mockImplementation(() => mockUpdate()),
@@ -53,7 +53,8 @@ describe("Notes API - Ownership Guards", () => {
   });
 
   it("PATCH allows when investigation belongs to user", async () => {
-    mockSupabaseQuery.mockResolvedValue({ data: { id: "inv-123" }, error: null });
+    mockSupabaseQuery.mockResolvedValueOnce({ data: { id: "inv-123" }, error: null })
+      .mockResolvedValueOnce({ data: { investigation_id: "inv-123", investigations: { user_id: "user-1" } }, error: null });
     mockUpdate.mockReturnValue({
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
@@ -75,5 +76,19 @@ describe("Notes API - Ownership Guards", () => {
     const res = await DELETE(req, { params });
     
     expect(res.status).toBe(404);
+  });
+
+  it("DELETE allows when investigation belongs to user", async () => {
+    mockSupabaseQuery.mockResolvedValueOnce({ data: { id: "inv-123" }, error: null })
+      .mockResolvedValueOnce({ data: { investigation_id: "inv-123", investigations: { user_id: "user-1" } }, error: null });
+    mockDelete.mockReturnValue({
+      eq: vi.fn().mockReturnThis(),
+    });
+
+    const req = createRequest("DELETE", { noteId: "note-1" });
+    const params = Promise.resolve({ id: "inv-123" });
+    const res = await DELETE(req, { params });
+    
+    expect(res.status).toBe(200);
   });
 });

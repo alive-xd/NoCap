@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Shield/3D/shield_3d.png" width="36" height="36" alt="NoCap Shield" /> NoCap Platform
+  NoCap Platform
 </h1>
 <p align="center">A Traceable, Explainable Threat Intelligence & Triage Workspace</p>
 
@@ -8,30 +8,29 @@
   <img src="https://img.shields.io/badge/Supabase-1.0%2B-3ECF8E?style=flat&logo=supabase" alt="Supabase" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat&logo=postgresql" alt="PostgreSQL" />
   <img src="https://github.com/alive-xd/NoCap/actions/workflows/ci.yml/badge.svg" alt="CI" />
-  <img src="https://img.shields.io/badge/coverage-88%25-brightgreen" alt="Coverage" />
 </p>
 
 <p align="center">
-  Designed using enterprise architecture patterns for modern security response teams.
+  Ingests raw targets, orchestrates parallel API fetchers, parses atomic evidence, and runs stateless analyzers to generate scored threat findings.
 </p>
 
 ---
 
-## 🚀 Live Demo & Credentials
+## Live Demo & Credentials
 
-**Public Live Instance:** [https://nocap.vercel.app](https://nocap.vercel.app) *(Update this with your actual Vercel URL)*
+**Public Live Instance:** [https://nocap-platform.vercel.app](https://nocap-platform.vercel.app)
 
 To test the application as an analyst, you can use the following demo credentials:
-* **Email:** `demo@nocap.com` *(Update with your actual demo email)*
-* **Password:** `demo1234` *(Update with your actual demo password)*
+* **Email:** `demo@nocap.com`
+* **Password:** `demo1234`
 
 **Public Read-Only Case Sharing:**
 You can view a read-only investigation without logging in by visiting a public demo link:
-* [View Public Investigation Demo](https://nocap.vercel.app/demo/example-case-id) *(Update with a real case ID)*
+* [View Public Investigation Demo](https://nocap-platform.vercel.app/demo/f47ac10b-58cc-4372-a567-0e02b2c3d479)
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **NoCap** is an enterprise-grade, evidence-backed threat intelligence triage workspace. 
 
@@ -39,7 +38,7 @@ Unlike traditional "black-box" reputation scanners that output arbitrary malicio
 
 ---
 
-## 🏢 Use Cases
+## Use Cases
 
 * **Incident Triage Desk:** Submit an IP, domain, file hash, or URL and receive a structured, aggregated threat report in under 1.5 seconds.
 * **Suspicious Email Triage:** Ingest raw EML headers to verify SPF/DKIM/DMARC alignment, trace relay hops, and detect brand homograph impersonations.
@@ -49,7 +48,7 @@ Unlike traditional "black-box" reputation scanners that output arbitrary malicio
 
 ---
 
-## 📊 Project Architecture Traits
+## Project Architecture Traits
 
 | Component | Reality-Backed Implementation |
 | :--- | :--- |
@@ -62,11 +61,11 @@ Unlike traditional "black-box" reputation scanners that output arbitrary malicio
 
 ---
 
-## ✨ Features & Architecture Upgrades
+## Features & Architecture Upgrades
 
 We have heavily invested in enterprise-grade security boundaries, architectural decoupling, and headless deployment capabilities.
 
-### 🛡️ Security & API Hardening
+### Security & API Hardening
 - **Headless JWT Bearer Auth:** The Supabase SSR client is extended to fully support headless `Authorization: Bearer <token>` API requests. This bypasses Next.js cookie restrictions, making NoCap perfectly suited for CI/CD integrations, CLI tooling, and machine-to-machine automations.
 - **Strict API Boundaries (401 vs 307):** Next.js middleware is hardened to return strict `401 Unauthorized` JSON responses for unauthorized API calls, completely eliminating dangerous `307 Redirect` to `/login` behaviors that cause frontend router bugs and accidental data leakage.
 - **VERCEL_ENV Fail-Closed Security:** The middleware evaluates environment configurations dynamically. If the environment is misconfigured or `VERCEL_ENV` fails integrity checks, the app fails closed with a `500 Internal Server Error`, ensuring zero test bypasses go live to production.
@@ -74,28 +73,28 @@ We have heavily invested in enterprise-grade security boundaries, architectural 
 - **Global API Rate Limiting:** All routes are protected by Redis/database-backed rate limiters (e.g., 5 case creations per minute) to protect external intelligence API quotas from abuse.
 - **Decoupled Cron Authentication:** A middleware whitelist opens `/api/cron/*`, delegating strict authorization directly to the route handlers via a cryptographic `CRON_SECRET` check. This isolates background job triggers from user sessions.
 
-### 🧩 UI & Visualization
+### UI & Visualization
 - **Spider/Radar Threat Charts:** A highly customized, pure-SVG brutalist Radar Chart breaks down threat intelligence scores across three domains: `Infrastructure`, `Malware / Reputation`, and `Phishing / Email`. Unanalyzed dimensions gracefully fall back to a dashed "Not Analyzed" aesthetic, preventing misleading zero-scores.
 - **Dark-Mode Institutional Aesthetic:** NoCap uses vanilla CSS with a curated palette of greys, muted accents, and monospace fonts to create a highly focused, no-nonsense security dashboard.
 
 ---
 
-## 🧪 Validated Test Cases
+## Validated Test Cases
 
-The following complex end-to-end security test suites pass successfully on NoCap:
+The following complex end-to-end security test suites verify NoCap's security boundaries:
 
 1. **End-to-End Tenant Isolation (Multi-User Ownership Test):** 
    - **Scenario:** User A creates an investigation and adds a private note. User B attempts to `PATCH` or `GET` User A's note using raw API requests.
-   - **Result:** **PASSED**. The backend returns a rigid `404 Not Found` at the database lookup level due to the strict `eq('user_id', session.user.id)` constraint, hiding the existence of the resource entirely from the unauthorized tenant.
+   - **Verifies:** The backend returns a rigid `404 Not Found` at the database lookup level due to the strict `eq('user_id', session.user.id)` constraint, hiding the existence of the resource entirely from the unauthorized tenant.
 2. **Headless Authentication Test:**
    - **Scenario:** CLI script signs in natively via the Supabase Auth REST API (`grant_type=password`), parses the resulting JWT `access_token`, and issues `curl` requests with an `Authorization: Bearer` header against protected `/api/investigations` endpoints.
-   - **Result:** **PASSED**. The backend middleware correctly intercepts the Bearer token, bypasses Next.js cookie stores, and validates the session natively.
+   - **Verifies:** The backend middleware correctly intercepts the Bearer token, bypasses Next.js cookie stores, and validates the session natively.
 3. **Cron Job Authorization Test:**
    - **Scenario:** A simulated background worker sends a `POST` request to `/api/cron/cve-watch` using a valid vs invalid `Authorization: Bearer <CRON_SECRET>`.
-   - **Result:** **PASSED**. Valid secrets execute the job; invalid secrets return immediate `401 Unauthorized`.
+   - **Verifies:** Valid secrets execute the job; invalid secrets return immediate `401 Unauthorized`.
 4. **Batch Rate Limit Stress Test:**
    - **Scenario:** A script fires 20 rapid, concurrent requests to protected endpoints.
-   - **Result:** **PASSED**. The API properly accepts the first 5 requests and gracefully returns `429 Too Many Requests` with rate-limit headers for the overflow, shielding upstream providers.
+   - **Verifies:** The API properly accepts the first 5 requests and gracefully returns `429 Too Many Requests` with rate-limit headers for the overflow, shielding upstream providers.
 
 ---
 

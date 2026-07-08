@@ -14,7 +14,7 @@ vi.mock("@/lib/supabase/server", () => ({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockImplementation(() => {
-          if (table === "investigations") return mockSupabaseQuery();
+          if (table === "investigations" || table === "tags") return mockSupabaseQuery();
           return { data: null, error: null };
         }),
         delete: vi.fn().mockImplementation(() => mockDelete()),
@@ -48,7 +48,8 @@ describe("Tags API - Ownership Guards", () => {
   });
 
   it("DELETE allows when investigation belongs to user", async () => {
-    mockSupabaseQuery.mockResolvedValue({ data: { id: "inv-123" }, error: null });
+    mockSupabaseQuery.mockResolvedValueOnce({ data: { id: "inv-123" }, error: null })
+      .mockResolvedValueOnce({ data: { user_id: "user-1" }, error: null });
     mockDelete.mockReturnValue({
       eq: vi.fn().mockReturnThis(),
     });
