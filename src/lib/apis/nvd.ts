@@ -8,38 +8,7 @@
 
 const NVD_BASE = "https://services.nvd.nist.gov/rest/json/cves/2.0";
 
-export interface NVDCve {
-  id: string;
-  published: string;
-  lastModified: string;
-  vulnStatus: string;
-  descriptions: Array<{ lang: string; value: string }>;
-  metrics?: {
-    cvssMetricV31?: Array<{
-      cvssData: {
-        baseScore: number;
-        baseSeverity: string;
-        vectorString: string;
-      };
-    }>;
-    cvssMetricV2?: Array<{
-      cvssData: {
-        baseScore: number;
-      };
-    }>;
-  };
-  references?: Array<{ url: string; source: string; tags?: string[] }>;
-}
 
-export interface NVDResponse {
-  resultsPerPage: number;
-  startIndex: number;
-  totalResults: number;
-  format: string;
-  version: string;
-  timestamp: string;
-  vulnerabilities: Array<{ cve: NVDCve }>;
-}
 
 /**
  * Searches for CVEs by keyword (e.g. "Microsoft Exchange").

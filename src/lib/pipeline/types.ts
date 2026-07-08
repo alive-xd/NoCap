@@ -18,9 +18,9 @@ export type InvestigationStatus =
   | "COMPLETED"
   | "FAILED";
 
-export type FindingStatus = "FLAGGED" | "CONFIRMED" | "CLEARED" | "UNDER_REVIEW";
+type FindingStatus = "FLAGGED" | "CONFIRMED" | "CLEARED" | "UNDER_REVIEW";
 
-export type Severity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
+type Severity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO";
 
 export type ConfidenceLabel = "High" | "Medium" | "Low";
 
@@ -90,7 +90,7 @@ export interface ScoringProfile {
   created_at: string;
 }
 
-export interface InvestigationMetrics {
+interface InvestigationMetrics {
   investigation_id: string;
   artifacts_fetched: number;
   evidence_extracted: number;
@@ -99,7 +99,7 @@ export interface InvestigationMetrics {
   execution_time_ms: number;
 }
 
-export interface Note {
+interface Note {
   id: string;
   investigation_id: string;
   content: string;
@@ -107,19 +107,13 @@ export interface Note {
   updated_at: string;
 }
 
-export interface Tag {
+interface Tag {
   id: string;
   user_id: string;
   name: string;
 }
 
-export interface WatchlistEntry {
-  id: string;
-  user_id: string;
-  target: string;
-  module: string;
-  created_at: string;
-}
+
 
 // ─── Pipeline interfaces ──────────────────────────────────────────────────────
 
@@ -198,12 +192,9 @@ export interface InvestigationDetail extends Investigation {
   all_evidence?: Evidence[];
 }
 
-export interface FindingWithEvidence extends Finding {
+interface FindingWithEvidence extends Finding {
   evidence: Evidence[];
   artifact: Artifact | null; // the artifact the evidence came from
 }
 
-export interface EvidenceWithContext extends Evidence {
-  artifact: Pick<Artifact, "id" | "source" | "fetched_at">;
-  findings: Pick<Finding, "id" | "claim" | "severity">[];
-}
+

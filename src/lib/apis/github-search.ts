@@ -17,27 +17,7 @@
 
 const GH_BASE = "https://api.github.com";
 
-export interface GitHubCodeResult {
-  name: string;
-  path: string;
-  sha: string;
-  url: string;
-  git_url: string;
-  html_url: string;
-  repository: {
-    full_name: string;
-    html_url: string;
-    description: string | null;
-    private: boolean;
-  };
-  score: number;
-}
 
-export interface GitHubSearchResponse {
-  total_count: number;
-  incomplete_results: boolean;
-  items: GitHubCodeResult[];
-}
 
 /**
  * Searches GitHub public code for potential secrets referencing a domain.

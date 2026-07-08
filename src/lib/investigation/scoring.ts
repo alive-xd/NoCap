@@ -28,7 +28,7 @@ export interface ScoreResult {
   breakdown: ScoreLineItem[];
 }
 
-export interface ScoreLineItem {
+interface ScoreLineItem {
   claim: string;
   generatedBy: string;
   contribution: number;
