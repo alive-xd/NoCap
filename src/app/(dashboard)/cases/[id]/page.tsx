@@ -541,9 +541,26 @@ export default function InvestigationDetailPage() {
     if (!data) return;
     const inProgress = !["COMPLETED", "FAILED"].includes(data.status);
     if (!inProgress) return;
-    const interval = setInterval(fetchData, 2000);
-    return () => clearInterval(interval);
-  }, [data, fetchData]);
+
+    let active = true;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/investigations/${id}`);
+        if (!res.ok) return;
+        const d = await res.json() as InvestigationDetail;
+        if (active) {
+          setData(d);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 2000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [data?.status, id]);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
