@@ -499,7 +499,7 @@ export async function runIOCInvestigation(
   await db.from("investigations").update({
         status: "COMPLETED",
     final_score: scoreResult.finalScore,
-    scoring_profile_version: profileRow?.version ?? "1.0",
+    scoring_profile_version: profileRow?.version ?? null,
     failed_sources: failedSources,
     completed_at: new Date().toISOString(),
   }).eq("id", investigationId);
@@ -616,7 +616,7 @@ export async function runPhishingInvestigation(
   await db.from("investigations").update({
     status: "COMPLETED",
     final_score: scoreResult.finalScore,
-    scoring_profile_version: profileRow?.version ?? "1.0",
+    scoring_profile_version: profileRow?.version ?? null,
     failed_sources: failedSources,
     completed_at: new Date().toISOString(),
   }).eq("id", investigationId);
@@ -748,7 +748,7 @@ export async function runAttackSurfaceInvestigation(
   await db.from("investigations").update({
     status: "COMPLETED",
     final_score: scoreResult.finalScore,
-    scoring_profile_version: profileRow?.version ?? "1.0",
+    scoring_profile_version: profileRow?.version ?? null,
     failed_sources: failedSources,
     completed_at: new Date().toISOString(),
   }).eq("id", investigationId);
@@ -1051,7 +1051,7 @@ export async function runCVEInvestigation(
   await db.from("investigations").update({
         status: "COMPLETED",
     final_score: scoreResult.finalScore,
-    scoring_profile_version: profileRow?.version ?? "1.0",
+    scoring_profile_version: profileRow?.version ?? null,
     failed_sources: failedSources,
     completed_at: new Date().toISOString(),
   }).eq("id", investigationId);
