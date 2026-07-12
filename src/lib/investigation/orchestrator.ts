@@ -70,7 +70,7 @@ import type {
 
 // ── Supabase service client ───────────────────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getServiceClient(): any {
+export function getServiceClient(): any {
   if (isLocalMode) {
     return createLocalClient();
   }

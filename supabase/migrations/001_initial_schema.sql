@@ -51,7 +51,8 @@ CREATE TABLE investigations (
   scoring_profile_version TEXT REFERENCES scoring_profiles(version),
   failed_sources          JSONB NOT NULL DEFAULT '[]',    -- array of { source, reason }
   created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  completed_at            TIMESTAMPTZ                     -- nullable; enables duration metrics
+  completed_at            TIMESTAMPTZ,                     -- nullable; enables duration metrics
+  error_message           TEXT                            -- captures details when status is FAILED
 );
 
 CREATE INDEX investigations_user_id_idx ON investigations(user_id);

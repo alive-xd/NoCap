@@ -40,6 +40,7 @@ export interface Investigation {
 
   created_at: string;
   completed_at: string | null;
+  error_message: string | null;
 }
 
 export interface FailedSource {

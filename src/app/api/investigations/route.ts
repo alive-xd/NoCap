@@ -6,6 +6,7 @@ import {
   runPhishingInvestigation,
   runAttackSurfaceInvestigation,
   runCVEInvestigation,
+  getServiceClient,
 } from "@/lib/investigation/orchestrator";
 import { detectIOCType } from "@/lib/investigation/iocDetector";
 
@@ -93,6 +94,13 @@ export async function POST(request: NextRequest) {
         }
       } catch (err) {
         console.error("[investigations] Pipeline error:", err);
+        const error_message = err instanceof Error ? err.message : String(err);
+        const db = getServiceClient();
+        await db.from("investigations").update({
+          status: "FAILED",
+          error_message,
+          completed_at: new Date().toISOString(),
+        }).eq("id", investigationId);
       }
     };
 
