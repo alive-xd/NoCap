@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "target is required" }, { status: 400 });
   }
 
+  if (target.trim().length > 500) {
+    return NextResponse.json({ error: "target exceeds maximum length" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("watchlist")
     .upsert(
@@ -38,7 +42,10 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[watchlist] POST error:", error);
+    return NextResponse.json({ error: "Failed to modify watchlist" }, { status: 500 });
+  }
   return NextResponse.json(data, { status: 201 });
 }
 

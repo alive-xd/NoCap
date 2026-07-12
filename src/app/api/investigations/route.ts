@@ -34,6 +34,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "target cannot be empty" }, { status: 400 });
   }
 
+  if (target.trim().length > 500) {
+    return NextResponse.json({ error: "target exceeds maximum length" }, { status: 400 });
+  }
+
+  if (rawEmailHeaders && rawEmailHeaders.length > 50000) {
+    return NextResponse.json({ error: "rawEmailHeaders exceeds maximum length" }, { status: 400 });
+  }
+
   // ── Rate Limiting ──────────────────────────────────────────────────────────
   const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
   const { count: recentCount, error: countError } = await supabase
@@ -152,7 +160,8 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[investigations] GET error:", error);
+    return NextResponse.json({ error: "Failed to fetch investigations" }, { status: 500 });
   }
 
   // Group by Today / Yesterday / This Week / Archived

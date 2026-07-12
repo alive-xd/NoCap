@@ -56,7 +56,10 @@ export async function POST(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[notes] POST error:", error);
+    return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
+  }
   return NextResponse.json(note, { status: 201 });
 }
 
@@ -98,7 +101,10 @@ export async function PATCH(
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[notes] PATCH error:", error);
+    return NextResponse.json({ error: "Failed to update note" }, { status: 500 });
+  }
   return NextResponse.json(note);
 }
 
@@ -131,6 +137,9 @@ export async function DELETE(
     .eq("id", noteId)
     .eq("investigation_id", id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[notes] DELETE error:", error);
+    return NextResponse.json({ error: "Failed to delete note" }, { status: 500 });
+  }
   return NextResponse.json({ success: true });
 }

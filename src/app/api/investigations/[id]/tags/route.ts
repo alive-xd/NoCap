@@ -31,7 +31,8 @@ export async function POST(
     .single();
 
   if (tagError || !tag) {
-    return NextResponse.json({ error: tagError?.message ?? "Tag error" }, { status: 500 });
+    console.error("[tags] POST error:", tagError);
+    return NextResponse.json({ error: "Failed to modify tag" }, { status: 500 });
   }
 
   // Link to investigation
