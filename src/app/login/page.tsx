@@ -37,7 +37,6 @@ export default function LoginPage() {
     }
   };
 
-
   return (
     <>
       <style>{`
@@ -52,7 +51,6 @@ export default function LoginPage() {
 
         .login-card {
           width: 100%;
-          max-width: 400px;
           background: var(--bg-surface);
           border: var(--border);
           border-radius: var(--radius-md);
@@ -174,100 +172,122 @@ export default function LoginPage() {
       `}</style>
 
       <div className="login-container">
-        <div className="login-card">
-          {magicSent ? (
-            <>
-              <div className="login-stamp-icon">✉</div>
-              <h1 className="login-title">Check your inbox</h1>
-              <p className="login-subtitle">
-                A confirmation link has been sent to <span className="mono">{email}</span>.
-                Open it to activate your account.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="login-header">
-            <div className="login-wordmark">
-              No<span>Cap</span>
-            </div>
-            <div className="login-tagline">Threat Intelligence Platform</div>
+        {/* Case-file top-tab + card wrapper */}
+        <div className="login-card-wrapper">
+          {/* ── Case-file document tab ── */}
+          <div className="login-card-tab">
+            <span className="login-card-tab-label">Analyst Access</span>
+            <span aria-hidden="true">
+              <span className="login-card-tab-marks">
+                <span className="login-card-tab-mark" />
+                <span className="login-card-tab-mark" />
+                <span className="login-card-tab-mark" />
+              </span>
+            </span>
           </div>
 
-          <h1 className="login-title">
-            {mode === "signin" ? "Open a session" : "Create account"}
-          </h1>
-          <p className="login-subtitle">
-            {mode === "signin"
-              ? "Sign in to access your case files and investigation history."
-              : "Create an analyst account to start investigating indicators."}
-          </p>
-
-          <form className="login-form" onSubmit={handleSubmit}>
-            {error && <div className="login-error">{error}</div>}
-
-            <div className="login-field">
-              <label htmlFor="email">Email address</label>
-              <input
-                id="email"
-                type="email"
-                className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="analyst@example.com"
-                required
-                autoComplete="email"
-              />
-            </div>
-
-            <div className="login-field">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                className="input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                minLength={8}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary login-submit"
-              disabled={loading}
-            >
-              {loading
-                ? "Working..."
-                : mode === "signin"
-                ? "Open Case Files"
-                : "Create Account"}
-            </button>
-          </form>
-
-          <hr className="login-divider" />
-
-          <div className="login-toggle">
-            {mode === "signin" ? (
+          {/* ── Shared card — both form and confirmation live here ── */}
+          <div className="login-card">
+            {magicSent ? (
+              /* ── Confirmation state ── */
               <>
-                New analyst?{" "}
-                <button onClick={() => setMode("signup")}>Create account</button>
+                <div className="login-stamp-icon">✉</div>
+                <h1 className="login-title">Check your inbox</h1>
+                <p className="login-subtitle">
+                  A confirmation link has been sent to{" "}
+                  <span className="mono">{email}</span>.
+                  Open it to activate your account.
+                </p>
+                <div className="login-footer">
+                  <span className="mono">NoCap v1.0 — Evidence-backed threat intelligence</span>
+                </div>
               </>
             ) : (
+              /* ── Sign in / sign up form ── */
               <>
-                Already registered?{" "}
-                <button onClick={() => setMode("signin")}>Sign in</button>
+                <div className="login-header">
+                  <div className="login-wordmark">
+                    No<span>Cap</span>
+                  </div>
+                  <div className="login-tagline">Threat Intelligence Platform</div>
+                </div>
+
+                <h1 className="login-title">
+                  {mode === "signin" ? "Open a session" : "Create account"}
+                </h1>
+                <p className="login-subtitle">
+                  {mode === "signin"
+                    ? "Sign in to access your case files and investigation history."
+                    : "Create an analyst account to start investigating indicators."}
+                </p>
+
+                <form className="login-form" onSubmit={handleSubmit}>
+                  {error && <div className="login-error">{error}</div>}
+
+                  <div className="login-field">
+                    <label htmlFor="email">Email address</label>
+                    <input
+                      id="email"
+                      type="email"
+                      className="input"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="analyst@example.com"
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <div className="login-field">
+                    <label htmlFor="password">Password</label>
+                    <input
+                      id="password"
+                      type="password"
+                      className="input"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                      minLength={8}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary login-submit"
+                    disabled={loading}
+                  >
+                    {loading
+                      ? "Working..."
+                      : mode === "signin"
+                      ? "Open Case Files"
+                      : "Create Account"}
+                  </button>
+                </form>
+
+                <hr className="login-divider" />
+
+                <div className="login-toggle">
+                  {mode === "signin" ? (
+                    <>
+                      New analyst?{" "}
+                      <button onClick={() => setMode("signup")}>Create account</button>
+                    </>
+                  ) : (
+                    <>
+                      Already registered?{" "}
+                      <button onClick={() => setMode("signin")}>Sign in</button>
+                    </>
+                  )}
+                </div>
+
+                <div className="login-footer">
+                  <span className="mono">NoCap v1.0 — Evidence-backed threat intelligence</span>
+                </div>
               </>
             )}
           </div>
-
-          <div className="login-footer">
-            <span className="mono">NoCap v1.0 — Evidence-backed threat intelligence</span>
-          </div>
-            </>
-          )}
         </div>
       </div>
     </>

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { Investigation } from "@/lib/pipeline/types";
+import PipelineChain from "@/components/PipelineChain";
 
 function scoreColor(score: number | null): string {
   if (score === null) return "var(--text-tertiary)";
@@ -63,58 +64,75 @@ export default async function DashboardPage() {
 
   if (!user) {
     return (
-      <div style={{ maxWidth: "800px", margin: "4rem auto", padding: "0 2rem" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "2.5rem", marginBottom: "1rem", color: "var(--text-primary)" }}>
-          NoCap
-        </h1>
-        <p style={{ fontSize: "1.125rem", color: "var(--text-secondary)", marginBottom: "2rem", lineHeight: 1.6 }}>
-          Evidence-backed triage, not a black-box score. Uncover the truth behind any indicator with 
-          transparent, step-by-step analysis.
-        </p>
-        
-        <div className="panel" style={{ padding: "2rem", marginBottom: "2.5rem" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", marginBottom: "1.5rem", color: "var(--text-primary)" }}>
-            Platform Features
-          </h2>
-          <ul style={{ display: "flex", flexDirection: "column", gap: "1.5rem", listStyle: "none", padding: 0, margin: 0 }}>
-            <li>
-              <div style={{ fontWeight: 500, color: "var(--text-primary)", marginBottom: "4px" }}>The Evidence Ledger</div>
-              <div style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>Every finding is backed by an itemized chain of evidence (Artifact → Parser → Evidence → Analyzer → Finding → Score), providing total transparency into the final score.</div>
-            </li>
-            <li>
-              <div style={{ fontWeight: 500, color: "var(--text-primary)", marginBottom: "4px" }}>Concurrent Multi-source Ingestion</div>
-              <div style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>Artifacts are fetched in parallel from industry OSINT sources, minimizing extraction time.</div>
-            </li>
-            <li>
-              <div style={{ fontWeight: 500, color: "var(--text-primary)", marginBottom: "4px" }}>Analyzer Library</div>
-              <div style={{ color: "var(--text-secondary)", fontSize: "0.9375rem" }}>Customizable analyzers process raw artifacts into standardized, actionable findings across all target types.</div>
-            </li>
-          </ul>
+      <main className="landing-page">
+        {/* ── Eyebrow ── */}
+        <div className="landing-eyebrow" aria-hidden="true">
+          <span className="landing-eyebrow-bar" />
+          <span className="landing-eyebrow-label">NoCap Threat Intelligence</span>
         </div>
 
-        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-          <Link 
-            href="/demo/fe9c426d-d5f5-4a5f-8fd4-ae986fcb02c1" 
-            className="btn-primary" 
-            style={{ textDecoration: "none" }}
+        {/* ── Headline ── */}
+        <h1 className="landing-headline">
+          Evidence-backed triage,<br />
+          not a <span>black-box score</span>.
+        </h1>
+        <p className="landing-sub">
+          Investigate any indicator — domain, IP, URL, hash, or CVE — with a structured
+          pipeline that traces every finding back to the raw source artifact that produced it.
+        </p>
+
+        {/* ── Pipeline Chain ── */}
+        <section className="landing-chain-section" aria-label="Investigation pipeline">
+          <div className="landing-chain-header">The Evidence Pipeline</div>
+          <PipelineChain size="hero" />
+        </section>
+
+        {/* ── Feature grid ── */}
+        <div className="landing-features" role="list">
+          <div className="landing-feature" role="listitem">
+            <div className="landing-feature-label">01 — Traceability</div>
+            <div className="landing-feature-title">The Evidence Ledger</div>
+            <div className="landing-feature-body">
+              Every finding is backed by an itemised chain of evidence —
+              Artifact → Parser → Evidence → Analyzer → Finding → Score.
+              The final risk score is never opaque.
+            </div>
+          </div>
+          <div className="landing-feature" role="listitem">
+            <div className="landing-feature-label">02 — Speed</div>
+            <div className="landing-feature-title">Concurrent Ingestion</div>
+            <div className="landing-feature-body">
+              Artifacts are fetched in parallel from industry OSINT sources,
+              minimising extraction time without sacrificing coverage.
+            </div>
+          </div>
+          <div className="landing-feature" role="listitem">
+            <div className="landing-feature-label">03 — Extensibility</div>
+            <div className="landing-feature-title">Analyzer Library</div>
+            <div className="landing-feature-body">
+              Domain-specific analyzers convert raw evidence into standardised,
+              actionable findings across all target types.
+            </div>
+          </div>
+        </div>
+
+        {/* ── CTA ── */}
+        <div className="landing-cta">
+          <Link
+            href="/demo/fe9c426d-d5f5-4a5f-8fd4-ae986fcb02c1"
+            className="landing-cta-primary"
+            id="landing-demo-btn"
           >
             View Demo Case
           </Link>
-          <Link 
-            href="/login" 
-            style={{ 
-              color: "var(--text-secondary)", 
-              textDecoration: "none", 
-              fontFamily: "var(--font-mono)", 
-              fontSize: "0.875rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em"
-            }}
+          <Link
+            href="/login"
+            className="landing-cta-secondary"
           >
             Analyst Login →
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -468,9 +486,30 @@ export default async function DashboardPage() {
             </div>
 
             {investigations.length === 0 ? (
-              <div className="empty-cases panel">
-                <p>No investigations yet.</p>
-                <Link href="/new" className="btn btn-secondary">
+              <div className="empty-cases-new">
+                {/* Case folder SVG — line art only, no fill */}
+                <svg
+                  className="empty-cases-svg"
+                  width="120"
+                  height="90"
+                  viewBox="0 0 120 90"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  {/* Folder tab */}
+                  <path d="M8 28 L8 22 Q8 20 10 20 L44 20 L50 14 L80 14 Q82 14 82 16 L82 20 L110 20 Q112 20 112 22 L112 82 Q112 84 110 84 L10 84 Q8 84 8 82 Z" stroke="currentColor" strokeWidth="1.5" />
+                  {/* Lines suggesting document content */}
+                  <line x1="24" y1="44" x2="96" y2="44" stroke="currentColor" strokeWidth="1" strokeDasharray="4 3" />
+                  <line x1="24" y1="54" x2="96" y2="54" stroke="currentColor" strokeWidth="1" strokeDasharray="4 3" />
+                  <line x1="24" y1="64" x2="72" y2="64" stroke="currentColor" strokeWidth="1" strokeDasharray="4 3" />
+                </svg>
+                <p className="empty-cases-title">No open cases.</p>
+                <p className="empty-cases-body">
+                  Submit a domain, IP, URL, hash, or CVE to begin a structured investigation.
+                  All findings will be traceable back to their source artifacts.
+                </p>
+                <Link href="/new" className="btn btn-primary">
                   Open your first case
                 </Link>
               </div>
