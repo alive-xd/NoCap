@@ -685,15 +685,6 @@ export default function InvestigationDetailPage() {
           </div>
         </div>
 
-        {/* IOC History banner */}
-        {data.prior_investigations && data.prior_investigations.length > 0 && (
-          <div className="prior-inv-banner">
-            Previously seen {data.prior_investigations.length} time{data.prior_investigations.length !== 1 ? "s" : ""}.{" "}
-            Last investigation: {data.prior_investigations[0].case_number} —
-            Score: {data.prior_investigations[0].final_score ?? "—"} —{" "}
-            {new Date(data.prior_investigations[0].created_at).toLocaleDateString()}
-          </div>
-        )}
 
         {/* Source status bar */}
         {uniqueSources.length > 0 && (
