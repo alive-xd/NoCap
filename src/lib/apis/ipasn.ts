@@ -12,6 +12,7 @@ import { promises as dns } from "dns";
 import { isIPv4, isIPv6 } from "net";
 
 const IPAPI_BASE = "http://ip-api.com/json";
+const TIMEOUT_MS = 8_000;
 
 export async function fetchIPASN(
   target: string
@@ -35,7 +36,20 @@ export async function fetchIPASN(
   const fields = "status,message,country,countryCode,isp,org,as,query";
   const url = `${IPAPI_BASE}/${encodeURIComponent(ip)}?fields=${fields}`;
 
-  const response = await fetch(url, { cache: "no-store" });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  const response = await fetch(url, {
+    cache: "no-store",
+    signal: controller.signal,
+  }).catch((err: unknown) => {
+    clearTimeout(timer);
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`ip-api.com request timed out after ${TIMEOUT_MS / 1000}s`);
+    }
+    throw err;
+  });
+  clearTimeout(timer);
 
   if (!response.ok) {
     throw new Error(`ip-api.com error ${response.status} for ${ip}`);

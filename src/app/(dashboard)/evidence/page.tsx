@@ -55,7 +55,7 @@ export default function EvidenceExplorerPage() {
   return (
     <>
       <style>{`
-        .explorer-page { padding: 2rem 2.5rem; max-width: 1100px; }
+        .explorer-page { padding: 2rem 2.5rem; max-width: 1100px; margin: 0 auto; }
 
         .explorer-header {
           margin-bottom: 1.5rem;

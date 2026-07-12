@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
 import { NextRequest } from "next/server";
 
+// Stub `after` so the route handler doesn't throw in the test environment.
+// We call the callback synchronously so any pipeline mock side-effects are exercised.
+vi.mock("next/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/server")>();
+  return {
+    ...actual,
+    after: vi.fn((fn: () => void) => { fn(); }),
+  };
+});
+
 const mockGetUser = vi.fn();
 const mockSupabaseQuery = vi.fn();
 const mockInsert = vi.fn();

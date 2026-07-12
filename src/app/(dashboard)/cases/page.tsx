@@ -147,7 +147,7 @@ export default async function CasesPage({
   return (
     <>
       <style>{`
-        .cases-page { padding: 2rem 2.5rem; max-width: 1000px; }
+        .cases-page { padding: 2rem 2.5rem; max-width: 1000px; margin: 0 auto; }
 
         .cases-header {
           display: flex;

@@ -99,6 +99,7 @@ export default function NewInvestigationPage() {
         .new-page {
           padding: 2rem 2.5rem;
           max-width: 720px;
+          margin: 0 auto;
         }
 
         .new-header {

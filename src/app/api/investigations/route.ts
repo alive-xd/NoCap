@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   createInvestigationRecord,
@@ -8,6 +8,10 @@ import {
   runCVEInvestigation,
 } from "@/lib/investigation/orchestrator";
 import { detectIOCType } from "@/lib/investigation/iocDetector";
+
+// Keep the serverless function alive long enough for `after()` to finish.
+// Hobby plan ceiling: 60s. Pro plan ceiling: 300s.
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -92,8 +96,10 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Fire and forget — don't await
-    runPipeline();
+    // Schedule the pipeline to run after the response is sent.
+    // `after()` tells Next.js/Vercel to keep the function alive until the callback
+    // resolves, even though the HTTP response has already been returned.
+    after(() => runPipeline());
 
     return NextResponse.json({ id: investigationId, status: "CREATED" }, { status: 202 });
   } catch (err) {

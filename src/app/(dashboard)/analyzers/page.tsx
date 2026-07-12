@@ -208,7 +208,7 @@ export default function AnalyzerLibraryPage() {
   return (
     <>
       <style>{`
-        .library-page { padding: 2rem 2.5rem; max-width: 1000px; }
+        .library-page { padding: 2rem 2.5rem; max-width: 1000px; margin: 0 auto; }
 
         .library-header {
           margin-bottom: 2rem;

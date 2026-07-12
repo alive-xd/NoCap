@@ -9,6 +9,7 @@ import { promises as dns } from "dns";
 import { isIPv4, isIPv6 } from "net";
 
 const ABUSEIPDB_BASE = "https://api.abuseipdb.com/api/v2";
+const TIMEOUT_MS = 8_000;
 
 /**
  * Fetches a raw AbuseIPDB check report for an IP address.
@@ -44,13 +45,24 @@ export async function fetchAbuseIPDB(
     verbose: "false",
   });
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
   const response = await fetch(`${ABUSEIPDB_BASE}/check?${params}`, {
     headers: {
       Key: apiKey,
       Accept: "application/json",
     },
     cache: "no-store",
+    signal: controller.signal,
+  }).catch((err: unknown) => {
+    clearTimeout(timer);
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`AbuseIPDB request timed out after ${TIMEOUT_MS / 1000}s`);
+    }
+    throw err;
   });
+  clearTimeout(timer);
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => response.statusText);

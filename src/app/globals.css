@@ -492,7 +492,7 @@ textarea.input {
    CASE DETAIL VIEWS
    ──────────────────────────────────────────────────────────────────────────── */
 
-.detail-page { padding: 1.5rem 2rem; max-width: 1200px; }
+.detail-page { padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto; }
 
 .detail-header {
   margin-bottom: 1.5rem;

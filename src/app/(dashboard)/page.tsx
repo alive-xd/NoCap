@@ -199,6 +199,7 @@ export default async function DashboardPage() {
         .desk-page {
           padding: 2rem 2.5rem;
           max-width: 1100px;
+          margin: 0 auto;
         }
 
         .desk-header {

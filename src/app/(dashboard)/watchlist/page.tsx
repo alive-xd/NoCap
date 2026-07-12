@@ -53,7 +53,7 @@ export default function WatchlistPage() {
   return (
     <>
       <style>{`
-        .watchlist-page { padding: 2rem 2.5rem; max-width: 720px; }
+        .watchlist-page { padding: 2rem 2.5rem; max-width: 720px; margin: 0 auto; }
 
         .watchlist-header {
           margin-bottom: 2rem;
