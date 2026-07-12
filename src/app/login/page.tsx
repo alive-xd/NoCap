@@ -37,20 +37,6 @@ export default function LoginPage() {
     }
   };
 
-  if (magicSent) {
-    return (
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-stamp-icon">✉</div>
-          <h1 className="login-title">Check your inbox</h1>
-          <p className="login-subtitle">
-            A confirmation link has been sent to <span className="mono">{email}</span>.
-            Open it to activate your account.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -189,7 +175,18 @@ export default function LoginPage() {
 
       <div className="login-container">
         <div className="login-card">
-          <div className="login-header">
+          {magicSent ? (
+            <>
+              <div className="login-stamp-icon">✉</div>
+              <h1 className="login-title">Check your inbox</h1>
+              <p className="login-subtitle">
+                A confirmation link has been sent to <span className="mono">{email}</span>.
+                Open it to activate your account.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="login-header">
             <div className="login-wordmark">
               No<span>Cap</span>
             </div>
@@ -269,6 +266,8 @@ export default function LoginPage() {
           <div className="login-footer">
             <span className="mono">NoCap v1.0 — Evidence-backed threat intelligence</span>
           </div>
+            </>
+          )}
         </div>
       </div>
     </>

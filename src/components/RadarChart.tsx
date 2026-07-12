@@ -113,8 +113,8 @@ export default function RadarChart({ findings }: RadarChartProps) {
         {/* Data Polygon */}
         <polygon
           points={dataPolygon}
-          fill="color-mix(in srgb, var(--accent-severe) 20%, transparent)"
-          stroke="var(--accent-severe)"
+          fill="color-mix(in srgb, var(--accent-primary) 20%, transparent)"
+          stroke="var(--accent-primary)"
           strokeWidth="2"
         />
 
@@ -129,7 +129,7 @@ export default function RadarChart({ findings }: RadarChartProps) {
               cy={p.y}
               r="4"
               fill="var(--bg-base)"
-              stroke="var(--accent-severe)"
+              stroke="var(--accent-primary)"
               strokeWidth="2"
             />
           );
@@ -146,7 +146,7 @@ export default function RadarChart({ findings }: RadarChartProps) {
                 x={labelPoint.x}
                 y={labelPoint.y + 2} // Align vertically
                 textAnchor="middle"
-                fill={isAnalyzed ? "var(--text-secondary)" : "var(--text-muted)"}
+                fill={isAnalyzed ? "var(--text-secondary)" : "var(--text-tertiary)"}
                 fontSize="11"
                 fontFamily="var(--font-mono)"
                 letterSpacing="0.05em"
@@ -159,7 +159,7 @@ export default function RadarChart({ findings }: RadarChartProps) {
                   x={labelPoint.x}
                   y={labelPoint.y + 16} // Right under the main label
                   textAnchor="middle"
-                  fill="var(--text-muted)"
+                  fill="var(--text-tertiary)"
                   fontSize="9"
                   fontFamily="var(--font-mono)"
                   letterSpacing="0.05em"
