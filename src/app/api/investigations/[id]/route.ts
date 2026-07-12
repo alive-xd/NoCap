@@ -8,7 +8,6 @@ export async function GET(
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  // Fetch the investigation
   const { data: investigation, error: invError } = await supabase
     .from("investigations")
     .select("*")
@@ -16,6 +15,10 @@ export async function GET(
     .single();
 
   if (invError || !investigation) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (investigation.user_id !== user?.id && !investigation.is_public_demo) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

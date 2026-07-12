@@ -63,4 +63,21 @@ describe("GET /api/investigations/[id] - Demo Route RLS behavior", () => {
     const json = await res.json();
     expect(json.id).toBe("123");
   });
+
+  it("returns 404 if investigation belongs to another user and is not a public demo", async () => {
+    // Authenticated user with ID "user-456"
+    mockGetUser.mockResolvedValue({ data: { user: { id: "user-456" } } });
+    
+    // DB returns investigation belonging to "user-123" with is_public_demo = false
+    mockSupabaseQuery.mockResolvedValue({ 
+      data: { id: "123", user_id: "user-123", is_public_demo: false, target: "example.com" }, 
+      error: null 
+    });
+
+    const req = createRequest();
+    const params = Promise.resolve({ id: "123" });
+    const res = await GET(req, { params });
+    
+    expect(res.status).toBe(404);
+  });
 });

@@ -117,4 +117,22 @@ describe("POST /api/investigations - Security & Validation", () => {
       // We know isolation is maintained because user-2 had 0 recent investigations mocked
     });
   });
+
+  describe("Input length limits", () => {
+    it("rejects target exceeding 500 characters", async () => {
+      const longTarget = "a".repeat(501);
+      const res = await POST(createRequest({ target: longTarget }));
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json.error).toContain("target exceeds maximum length");
+    });
+
+    it("rejects rawEmailHeaders exceeding 50000 characters", async () => {
+      const longHeaders = "a".repeat(50001);
+      const res = await POST(createRequest({ target: "example.com", rawEmailHeaders: longHeaders }));
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json.error).toContain("rawEmailHeaders exceeds maximum length");
+    });
+  });
 });
