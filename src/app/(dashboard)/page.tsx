@@ -119,7 +119,7 @@ export default async function DashboardPage() {
         {/* ── CTA ── */}
         <div className="landing-cta">
           <Link
-            href="/demo/fe9c426d-d5f5-4a5f-8fd4-ae986fcb02c1"
+            href="/demo/ce729122-83c5-4d40-9b07-a9b8718beee1"
             className="landing-cta-primary"
             id="landing-demo-btn"
           >
