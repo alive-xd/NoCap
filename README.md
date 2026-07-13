@@ -10,13 +10,13 @@ NoCap is an explainable threat intelligence triage workspace designed for securi
 
 ## Workspace Preview
 
-![Investigator's Desk Dashboard](/public/landing_page.png)
+![Investigator's Desk Dashboard](public/screenshots/landing.png)
 *The Investigator's Desk dashboard displays active, completed, and failed threat cases with global statistics.*
 
-![Completed Case Details View](/public/completed_case.png)
+![Completed Case Details View](public/screenshots/demo-case.png)
 *The case details page maps infrastructure, reputation, and email risk vectors using an SVG radar chart alongside verified findings.*
 
-![Analyzer Library Page](/public/analyzer_library.png)
+![Analyzer Library Page](public/screenshots/analyzer-library.png)
 *The Analyzer Library maps stateless modules to their evaluated inputs, descriptions, and threat categorization.*
 
 ---
