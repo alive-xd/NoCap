@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { proxy } from "../middleware";
+import { proxy } from "../proxy";
 import { NextRequest } from "next/server";
 
 // Mock @supabase/ssr so it doesn't complain about env vars
@@ -11,7 +11,7 @@ vi.mock("@supabase/ssr", () => ({
   })),
 }));
 
-describe("middleware.ts - CSRF check", () => {
+describe("proxy.ts - CSRF check", () => {
   const createMockRequest = (method: string, headers: Record<string, string>) => {
     const nextUrl = new URL("http://localhost:3000/api/some-endpoint");
     const reqHeaders = new Headers();
