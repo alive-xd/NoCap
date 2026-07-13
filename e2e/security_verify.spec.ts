@@ -12,7 +12,7 @@ test.describe('Security Hardening Verification', () => {
   const createdUserIds: string[] = [];
 
   // Helper to create a pre-confirmed user and log them in
-  async function createAndLoginUser(page, email: string) {
+  async function createAndLoginUser(page: any, email: string) {
     const password = 'TestPassword123!';
     
     // Create pre-confirmed user via Admin Auth API (bypasses signup rate limits and confirmation emails)
